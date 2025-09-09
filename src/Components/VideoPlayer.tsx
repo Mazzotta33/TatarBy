@@ -1,6 +1,127 @@
+import {useEffect, useRef, useState} from "react";
+import {useNavigate} from "react-router-dom";
+import * as React from "react";
 
-const VideoPlayer = () => {
+interface VideoPlayerProps {
+    trimStart: number;
+    trimEnd: number;
+    onTrimChange: (start: number, end: number) => void;
+}
+
+const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => {
+    const navigate = useNavigate();
+    const videoRef = useRef(null);
+    const containerRef = useRef(null);
+
+    // url видео берём из UploadPage
+    const [videoUrl] = useState(localStorage.getItem("uploadedVideo"));
+
+    // плеер: состояния
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(1);
+    const [muted, setMuted] = useState(false);
+    const [rate, setRate] = useState(1);
+
+    useEffect(() => {
+        if (!videoUrl) {
+            navigate("/");
+            return;
+        }
+    }, [videoUrl, navigate]);
+
+    // подписки на события видео
+    useEffect(() => {
+        const v: any = videoRef.current;
+        if (!v) return;
+
+        const onTime = () => {
+            setCurrentTime(v.currentTime);
+
+            // ⛔️ если дошли до trimEnd → стоп
+            if (v.currentTime >= trimEnd) {
+                v.pause();
+                setIsPlaying(false);
+            }
+        };
+
+        const onMeta = () => {
+            const d = isFinite(v.duration) ? v.duration : 0;
+            setDuration(d);
+            onTrimChange(0, d); // при загрузке видео
+        };
+
+        v.addEventListener("timeupdate", onTime);
+        v.addEventListener("loadedmetadata", onMeta);
+
+        return () => {
+            v.removeEventListener("timeupdate", onTime);
+            v.removeEventListener("loadedmetadata", onMeta);
+        };
+    }, [trimEnd, onTrimChange]);
+
+    // применяем громкость/мьют/скорость
+    useEffect(() => {
+        const v: any = videoRef.current;
+        if (!v) return;
+        v.volume = volume;
+        v.muted = muted;
+        v.playbackRate = rate;
+    }, [volume, muted, rate]);
+
+    const togglePlay = () => {
+        const v:any = videoRef.current;
+        if (!v) return;
+
+        if (v.paused) {
+            // 🎯 если вышли за пределы диапазона → стартуем с trimStart
+            if (v.currentTime < trimStart || v.currentTime >= trimEnd) {
+                v.currentTime = trimStart;
+            }
+            v.play();
+            setIsPlaying(true);
+        } else {
+            v.pause();
+            setIsPlaying(false);
+        }
+    };
+
+    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const t = Number(e.target.value);
+        if (videoRef.current) videoRef.current.currentTime = t;
+        setCurrentTime(t);
+    };
+
+    const handleMuteToggle = () => setMuted((m) => !m);
+
+    const format = (t: number) => {
+        if (!t || isNaN(t)) return "00:00";
+        const mm = Math.floor(t / 60)
+            .toString()
+            .padStart(2, "0");
+        const ss = Math.floor(t % 60)
+            .toString()
+            .padStart(2, "0");
+        return `${mm}:${ss}`;
+    };
+
+    // подсветка диапазона на таймлайне
+    const pct = (x: number) => (duration > 0 ? (x / duration) * 100 : 0);
+    const trackBg = `linear-gradient(
+    to right,
+    #3b82f6 0%,
+    #3b82f6 ${pct(trimStart)}%,
+    #10b981 ${pct(trimStart)}%,
+    #10b981 ${pct(trimEnd)}%,
+    #3b82f6 ${pct(trimEnd)}%,
+    #3b82f6 100%
+  )`;
+
+    if (!videoUrl) return null;
+
     return (
+
         <div
             ref={containerRef}
             className="relative bg-black rounded-lg overflow-hidden shadow-lg w-full max-w-3xl"
@@ -102,7 +223,7 @@ const VideoPlayer = () => {
                                             Number(e.target.value),
                                             trimEnd - 0.1
                                         );
-                                        setTrimStart(value);
+                                        onTrimChange(value, trimEnd);
                                         setCurrentTime(value);
                                         if (videoRef.current)
                                             videoRef.current.currentTime = value;
@@ -124,7 +245,7 @@ const VideoPlayer = () => {
                                             Number(e.target.value),
                                             trimStart + 0.1
                                         );
-                                        setTrimEnd(value);
+                                        onTrimChange(trimStart, value);
                                         setCurrentTime(value);
                                         if (videoRef.current)
                                             videoRef.current.currentTime = value;
