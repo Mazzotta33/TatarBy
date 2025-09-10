@@ -2,7 +2,6 @@ import {useEffect, useRef, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import * as React from "react";
 import TrimTimeLine from "./TrimTimeLine.tsx";
-import trimTimeLine from "./TrimTimeLine.tsx";
 
 interface VideoPlayerProps {
     trimStart: number;

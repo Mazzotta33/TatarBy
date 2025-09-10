@@ -1,1 +1,19 @@
+/* Базовый стиль option */
+select option {
+    background-color: #ffffff; /* фон списка */
+    color: #111827;           /* текст */
+}
+
+/* При наведении */
+select option:hover {
+    background-color: #d1fae5; /* светло-зелёный */
+}
+
+/* Выбранный элемент */
+select option:checked {
+    background-color: #10b981; /* основной зелёный */
+    color: #ffffff;           /* белый текст */
+}
+
+
 @import "tailwindcss";

@@ -1,13 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { useState} from "react";
+import { useState, useRef } from "react";
 
 const UploadFile = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(0);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
         if (!file) return;
 
         setLoading(true);
@@ -27,9 +28,13 @@ const UploadFile = () => {
                 setTimeout(() => {
                     setLoading(false);
                     navigate("/edit");
-                }, 300); // небольшая задержка
+                }, 300);
             }
         }, 200);
+    };
+
+    const handleButtonClick = () => {
+        fileInputRef.current?.click();
     };
 
     return (
@@ -39,11 +44,26 @@ const UploadFile = () => {
             <div className="bg-white p-8 rounded-xl shadow-md text-center w-96">
                 {!loading ? (
                     <>
-                        <p className="mb-4">Выберите файл для загрузки</p>
-                        <input type="file" accept="video/*" onChange={handleFileChange} />
-                        {/*<p className="text-xs text-gray-400 mt-2">*/}
-                        {/*    MP4, AVI, MOV, WMV (до 500 МБ)*/}
-                        {/*</p>*/}
+                        <p className="mb-4">Загрузите видеофайл</p>
+
+                        {/* Скрытый input */}
+                        <input
+                            type="file"
+                            accept="video/*"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            className="hidden"
+                        />
+
+                        {/* Кнопка */}
+                        <button
+                            onClick={handleButtonClick}
+                            className="px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600
+                                       text-white font-semibold shadow hover:shadow-lg hover:brightness-105
+                                       transition"
+                        >
+                            Загрузить видео
+                        </button>
                     </>
                 ) : (
                     <div>
