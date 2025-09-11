@@ -14,10 +14,8 @@ const UploadFile = () => {
         setLoading(true);
         setProgress(0);
 
-        // Сохраняем в localStorage
         localStorage.setItem("uploadedVideo", URL.createObjectURL(file));
 
-        // Симуляция загрузки (можно заменить реальной загрузкой на сервер)
         let fakeProgress = 0;
         const interval = setInterval(() => {
             fakeProgress += 10;
@@ -41,12 +39,11 @@ const UploadFile = () => {
         <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
             <h1 className="text-2xl font-bold text-green-600 mb-6">TatTranslate</h1>
 
-            <div className="bg-white p-8 rounded-xl shadow-md text-center w-96">
+            <div className="bg-white p-16 rounded-xl shadow-md text-center w-100">
                 {!loading ? (
                     <>
                         <p className="mb-4">Загрузите видеофайл</p>
 
-                        {/* Скрытый input */}
                         <input
                             type="file"
                             accept="video/*"
@@ -55,10 +52,9 @@ const UploadFile = () => {
                             className="hidden"
                         />
 
-                        {/* Кнопка */}
                         <button
                             onClick={handleButtonClick}
-                            className="px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600
+                            className="px-12 py-5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600
                                        text-white font-semibold shadow hover:shadow-lg hover:brightness-105
                                        transition"
                         >

@@ -23,6 +23,9 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPl
     const [muted, setMuted] = useState(false);
     const [rate, setRate] = useState(1);
 
+    const [showControls, setShowControls] = useState(false);
+    const hideTimerRef = useRef<number | null>(null);
+
     useEffect(() => {
         if (!videoUrl) {
             navigate("/");
@@ -37,10 +40,8 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPl
         const onTime = () => {
             const t = v.currentTime;
             setCurrentTime(t);
-            // вызываем callback наружу (чтобы EditPage мог искать субтитр)
             onTimeUpdate?.(t);
 
-            // если дошли до trimEnd — стоп
             if (trimEnd > 0 && t >= trimEnd) {
                 v.pause();
                 setIsPlaying(false);
@@ -50,7 +51,7 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPl
         const onMeta = () => {
             const d = isFinite(v.duration) ? v.duration : 0;
             setDuration(d);
-            onTrimChange(0, d); // устанавливаем трим по умолчанию
+            onTrimChange(0, d);
         };
 
         v.addEventListener("timeupdate", onTime);
@@ -89,7 +90,6 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPl
         const t = Number(e.target.value);
         if (videoRef.current) videoRef.current.currentTime = t;
         setCurrentTime(t);
-        // и вызываем наружу
         onTimeUpdate?.(t);
     };
 
@@ -113,6 +113,42 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPl
     #3b82f6 100%
   )`;
 
+    const clearHideTimer = () => {
+        if (hideTimerRef.current != null) {
+            window.clearTimeout(hideTimerRef.current);
+            hideTimerRef.current = null;
+        }
+    };
+
+    const startAutoHideTimer = (ms = 2500) => {
+        clearHideTimer();
+        hideTimerRef.current = window.setTimeout(() => {
+            setShowControls(false);
+            hideTimerRef.current = null;
+        }, ms);
+    };
+
+    const onMouseEnter = () => {
+        setShowControls(true);
+        clearHideTimer();
+    };
+
+    const onMouseMove = () => {
+        setShowControls(true);
+        startAutoHideTimer();
+    };
+
+    const onMouseLeave = () => {
+        clearHideTimer();
+        setShowControls(false);
+    };
+
+    useEffect(() => {
+        return () => {
+            clearHideTimer();
+        };
+    }, []);
+
     if (!videoUrl) return null;
 
     return (
@@ -121,6 +157,9 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPl
                 ref={containerRef}
                 className="relative bg-black rounded-lg overflow-hidden shadow-lg"
                 style={{ aspectRatio: "16 / 9", maxHeight: "80vh" }}
+                onMouseEnter={onMouseEnter}
+                onMouseMove={onMouseMove}
+                onMouseLeave={onMouseLeave}
             >
                 <video
                     ref={videoRef}
@@ -130,9 +169,9 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPl
                 />
 
                 <div className="absolute inset-0 flex flex-col justify-end">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-                    <div className="relative z-10 p-4 space-y-3 pointer-events-auto">
+                    <div
+                        className={`relative z-10 p-4 space-y-3 transform transition-all duration-200 ease-in-out
+                        ${showControls ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}>
                         <input
                             type="range"
                             min={0}
@@ -206,7 +245,6 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPl
                 </div>
             </div>
 
-            {/* Полоска трима находится в компоненте TrimTimeLine */}
             <TrimTimeLine duration={duration} trimStart={trimStart} trimEnd={trimEnd} onTrimChange={onTrimChange} />
         </div>
     );

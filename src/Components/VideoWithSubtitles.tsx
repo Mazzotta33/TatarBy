@@ -1,9 +1,8 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import VideoPlayer from "./VideoPlayer";
-import { Listbox } from "@headlessui/react";
+import {useNavigate} from "react-router-dom";
+import {useState} from "react";
+import VideoPlayer from "./VideoPlayer.tsx";
+import {Listbox} from "@headlessui/react";
 
-// === Список субтитров (взял из твоего набора) ===
 const subtitles = [
     { start: 27.2, end: 33.42, lang: "ru", text: { ru: "Мы рады приветствовать гостей и участников восьмого Международного Золотардынского форума.", tt: "Сигезенче Халыкара Алтын Урда форумында катнашучыларны һәм кунакларны каршы алуыбызга шатбыз.", ar: "" } },
     { start: 33.42, end: 43.0, lang: "ru", text: { ru: "Они вносят существенный вклад в изучение истории как татарского народа, так и народов Республики Татарстан и в целом истории России.", tt: "Алар татар халкының, Татарстан Республикасы халыкларының һәм гомумән, Россия тарихының тарихын өйрәнүгә зур өлеш кертә.", ar: "" } },
@@ -22,7 +21,7 @@ const subtitles = [
     { start: 176.4, end: 184.0, lang: "ru", text: { ru: "И мы, конечно, как организаторы, всегда готовы принять наших уважаемых коллег в Казани, в Булгарии, в Татарстане.", tt: "Һәм без, әлбәттә, оештыручылар буларак, Казанда, Болгариядә, Татарстанда хөрмәтле хезмәттәшләребезне кабул итәргә һәрвакыт әзер.", ar: "" } },
 ];
 
-export default function EditPage() {
+const VideoWithSubtitles = () => {
     const navigate = useNavigate();
 
     const [trimStart, setTrimStart] = useState(0);
@@ -144,47 +143,10 @@ export default function EditPage() {
                         className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
                         onClick={handleTrimAndGoExport}
                     >
-                        Перевести видео
+                        Субтитры
                     </button>
 
                     <div className="border-t border-gray-200 my-2"/>
-
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm text-gray-700">Громкость аудио ({audioVolume.toFixed(1)})</label>
-                        <input type="range" min={0} max={1} step={0.1} value={audioVolume}
-                               onChange={(e) => setAudioVolume(Number(e.target.value))}
-                               className="w-full accent-green-500"/>
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm text-gray-700">Громкость татарского
-                            ({tatarianVolume.toFixed(1)})</label>
-                        <input type="range" min={0} max={1} step={0.1} value={tatarianVolume}
-                               onChange={(e) => setTatarianVolume(Number(e.target.value))}
-                               className="w-full accent-green-500"/>
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm text-gray-700">Спикеры</label>
-                        <div className="flex gap-2">
-                            {["Алмаз", "Алсу"].map((sp) => (
-                                <button
-                                    key={sp}
-                                    onClick={() => setSpeaker(sp)}
-                                    className={`flex-1 px-4 py-2 rounded-lg font-medium border transition ${
-                                        speaker === sp
-                                            ? "bg-green-500 text-white border-green-600"
-                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                                    }`}
-                                >
-                                    {sp}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <Dropdown label="С какого языка" options={languages} value={sourceLang} onChange={setSourceLang}/>
-                    <Dropdown label="На какой язык" options={languages} value={targetLang} onChange={setTargetLang}/>
                 </div>
             </div>
         </div>
@@ -192,36 +154,4 @@ export default function EditPage() {
 }
 
 
-function Dropdown({label, options, value, onChange}: {
-    label: string;
-    options: string[];
-    value: string;
-    onChange: (val: string) => void
-}) {
-    return (
-        <div className="flex flex-col gap-2">
-            <label className="text-sm text-gray-700">{label}</label>
-            <Listbox value={value} onChange={onChange}>
-                <div className="relative">
-                    <Listbox.Button
-                        className="w-full p-2 border-2 border-green-500 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400">
-                        {value}
-                    </Listbox.Button>
-                    <Listbox.Options className="absolute mt-1 w-full rounded-md bg-white shadow-lg border border-green-400 z-10">
-                        {options.map((option) => (
-                            <Listbox.Option
-                                key={option}
-                                value={option}
-                                className={({ active, selected }) =>
-                                    `cursor-pointer select-none p-2 ${active ? "bg-green-100 text-green-700" : selected ? "bg-green-50 text-green-600" : "text-gray-700"}`
-                                }
-                            >
-                                {option}
-                            </Listbox.Option>
-                        ))}
-                    </Listbox.Options>
-                </div>
-            </Listbox>
-        </div>
-    );
-}
+export default VideoWithSubtitles;

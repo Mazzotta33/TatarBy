@@ -10,11 +10,11 @@ interface TrimTimelineProps {
 const TrimTimeLine = ({ duration, trimStart, trimEnd, onTrimChange }: TrimTimelineProps) => {
     const [localStart, setLocalStart] = useState(trimStart);
     const [localEnd, setLocalEnd] = useState(trimEnd);
-    const timelineRef = useRef<HTMLDivElement>(null); // Ссылка на контейнер временной шкалы
+    const timelineRef = useRef<HTMLDivElement>(null);
     const [isDraggingStart, setIsDraggingStart] = useState(false);
     const [isDraggingEnd, setIsDraggingEnd] = useState(false);
-    const [zoomLevel, setZoomLevel] = useState(1); // Для масштабирования
-    const [scrollOffset, setScrollOffset] = useState(0); // Для горизонтальной прокрутки
+    const [zoomLevel, setZoomLevel] = useState(1);
+    const [scrollOffset, setScrollOffset] = useState(0);
 
     useEffect(() => {
         setLocalStart(trimStart);
@@ -28,7 +28,6 @@ const TrimTimeLine = ({ duration, trimStart, trimEnd, onTrimChange }: TrimTimeli
         return `${mm}:${ss}`;
     };
 
-    // Метки времени (пока без учета масштаба и скролла)
     const generateTicks = useCallback((d: number, step: number) => {
         const ticks = [];
         for (let i = 0; i <= d; i += step) {
@@ -37,7 +36,7 @@ const TrimTimeLine = ({ duration, trimStart, trimEnd, onTrimChange }: TrimTimeli
         return ticks;
     }, []);
 
-    const ticks = generateTicks(duration, 5); // Метки каждые 5 секунд
+    const ticks = generateTicks(duration, 5);
 
     // Обработчики перетаскивания маркеров
     const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -45,18 +44,18 @@ const TrimTimeLine = ({ duration, trimStart, trimEnd, onTrimChange }: TrimTimeli
         const rect = timelineRef.current.getBoundingClientRect();
 
         // Рассчитываем новую позицию в секундах
-        const totalTimelineWidth = duration * 20 * zoomLevel; // Общая ширина таймлайна, как вы ее посчитали
+        const totalTimelineWidth = duration * 20 * zoomLevel;
         let newTimeInPixels = e.clientX - rect.left + timelineRef.current.scrollLeft;
         let newTime = (newTimeInPixels / totalTimelineWidth) * duration;
 
-        newTime = Math.max(0, Math.min(newTime, duration)); // Ограничиваем в пределах длительности
+        newTime = Math.max(0, Math.min(newTime, duration));
 
         if (isDraggingStart) {
-            const newStart = Math.min(newTime, localEnd - 0.5); // Минимум 0.5 секунды разницы
+            const newStart = Math.min(newTime, localEnd - 0.5);
             setLocalStart(newStart);
             onTrimChange(newStart, localEnd);
         } else if (isDraggingEnd) {
-            const newEnd = Math.max(newTime, localStart + 0.5); // Минимум 0.5 секунды разницы
+            const newEnd = Math.max(newTime, localStart + 0.5);
             setLocalEnd(newEnd);
             onTrimChange(localStart, newEnd);
         }
@@ -81,7 +80,6 @@ const TrimTimeLine = ({ duration, trimStart, trimEnd, onTrimChange }: TrimTimeli
         };
     }, [isDraggingStart, isDraggingEnd, handleMouseMove, handleMouseUp]);
 
-    // Обработчик колеса мыши для горизонтальной прокрутки (если нужно)
     const handleWheelScroll = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
         if (e.deltaY !== 0) {
             e.preventDefault();
@@ -122,7 +120,6 @@ const TrimTimeLine = ({ duration, trimStart, trimEnd, onTrimChange }: TrimTimeli
                         }}
                     />
 
-                    {/* красные маркеры начала/конца */}
                     <div
                         className="absolute top-1/2 -translate-y-1/2 h-10 w-1 bg-red-500 cursor-ew-resize z-10"
                         style={{ left: `${(localStart / duration) * timelineTotalWidth}px` }}
