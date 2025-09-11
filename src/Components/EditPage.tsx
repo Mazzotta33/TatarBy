@@ -1,16 +1,34 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import VideoPlayer from "./VideoPlayer.tsx";
+import VideoPlayer from "./VideoPlayer";
 import { Listbox } from "@headlessui/react";
+import * as React from "react";
+
+// === Список субтитров (взял из твоего набора) ===
+const subtitles = [
+    { start: 27.2, end: 33.42, lang: "ru", text: { ru: "Мы рады приветствовать гостей и участников восьмого Международного Золотардынского форума.", tt: "Сигезенче Халыкара Алтын Урда форумында катнашучыларны һәм кунакларны каршы алуыбызга шатбыз.", ar: "" } },
+    { start: 33.42, end: 43.0, lang: "ru", text: { ru: "Они вносят существенный вклад в изучение истории как татарского народа, так и народов Республики Татарстан и в целом истории России.", tt: "Алар татар халкының, Татарстан Республикасы халыкларының һәм гомумән, Россия тарихының тарихын өйрәнүгә зур өлеш кертә.", ar: "" } },
+    { start: 46.7, end: 57.5, lang: "ru", text: { ru: "Лусджучи или Золотая Орда является неотлеваемой частью российского культурного пространства и является частью общероссийского прошлого.", tt: "Лусджучи, ягъни Алтын Урда, Россия мәдәниятенең аерылгысыз өлеше булып тора һәм гомумроссия үткәненең өлеше булып тора.", ar: "" } },
+    { start: 59.7, end: 64.18, lang: "ar", text: { ar: "في الواقع أنا مسرور جداً للمشاركة في هذا المؤتمر الدولي", ru: "", tt: "" } },
+    { start: 64.18, end: 73.0, lang: "ar", text: { ar: "ولقد حسني الشرف بأن أكون من الشخصيات التي شدت الرحال من أقصى الغرب الإسلامي إلى أسير وسطة وبالضبط إلى قزان", ru: "", tt: "" } },
+    { start: 74.0, end: 87.3, lang: "ru", text: { ru: "Для меня, во-первых, произвело серьезное впечатление количество участников, среди них достаточно большой состав известных людей, историков. Когда у человека есть сильные корни, он всегда в этой жизни будет уверенно стоять на своих ногах.", tt: "Минем өчен, беренчедән, катнашучыларның саны, шул исәптән билгеле кешеләр, тарихчылар саны да шактый зур иде, чөнки кешенең тамырлары нык булгач, ул бу тормышта һәрвакыт үз аякларында ышаныч белән торачак.", ar: "" } },
+    { start: 95.0, end: 98.4, lang: "ru", text: { ru: "В истории не бывает однозначно хорошего или плохого явления.", tt: "Тарихта бернинди дә яхшы яки начар күренешләр юк.", ar: "" } },
+    { start: 99.4, end: 105.0, lang: "ru", text: { ru: "Мы из любого явления должны извлекать уроки для того, чтобы идти дальше.", tt: "Алга таба барыр өчен, без һәркайсы күренештән сабак алырга тиеш.", ar: "" } },
+    { start: 114.0, end: 129.2, lang: "ru", text: { ru: "Золото-Арденский форум – это мероприятие, которое имеет уже в международном масштабе хороший отклик, хорошо известное и, наверное, одно из главных научных мероприятий по тематике истории средних веков евразийского пространства.", tt: "Алтын-Ардэн форумы - халыкара дәрәҗәдә яхшы кабул ителгән, яхшы билгеле һәм, бәлки, Евразия киңлегенең урта гасырлар тарихы темасына багышланган төп фәнни чараларның берсе.", ar: "" } },
+    { start: 133.6, end: 139.04, lang: "ru", text: { ru: "Золотая Орда и Лос-Джучи – это те основы, на которых", tt: "Алтын Урда һәм Лос-Джучи - бу нигезләр.", ar: "" } },
+    { start: 139.04, end: 141.4, lang: "ru", text: { ru: "построена государственность многих наших стран.", tt: "Күп кенә илләребезнең дәүләтчелеге төзелгән.", ar: "" } },
+    { start: 162.5, end: 167.84, lang: "ru", text: { ru: "Международный Золотардынский форум – это уже такой бренд для всех специалистов,", tt: "Халыкара Алтын Урда форумы инде барлык белгечләр өчен шундый бренд.", ar: "" } },
+    { start: 168.04, end: 171.66, lang: "ru", text: { ru: "кто занимается золотардынским периодом, периодом татарских ханцев,", tt: "Алтын чоры, татар ханнары чоры,", ar: "" } },
+    { start: 171.78, end: 174.5, lang: "ru", text: { ru: "для тех, кто занимается средними веками.", tt: "урта гасырлар белән шөгыльләнүчеләр өчен.", ar: "" } },
+    { start: 176.4, end: 184.0, lang: "ru", text: { ru: "И мы, конечно, как организаторы, всегда готовы принять наших уважаемых коллег в Казани, в Булгарии, в Татарстане.", tt: "Һәм без, әлбәттә, оештыручылар буларак, Казанда, Болгариядә, Татарстанда хөрмәтле хезмәттәшләребезне кабул итәргә һәрвакыт әзер.", ar: "" } },
+];
 
 export default function EditPage() {
     const navigate = useNavigate();
 
-    // Состояния для обрезки видео
     const [trimStart, setTrimStart] = useState(0);
     const [trimEnd, setTrimEnd] = useState(0);
 
-    // Опции
     const [audioVolume, setAudioVolume] = useState(1);
     const [tatarianVolume, setTatarianVolume] = useState(1);
 
@@ -21,15 +39,17 @@ export default function EditPage() {
     const [sourceLang, setSourceLang] = useState(languages[0]);
     const [targetLang, setTargetLang] = useState(languages[1]);
 
+    const [currentSub, setCurrentSub] = useState<null | { start: number; end: number; text: Record<string,string>; lang?: string }>(null);
+
     const handleTrimAndGoExport = () => {
         localStorage.setItem(
             "trimRange",
             JSON.stringify({
                 start: trimStart,
                 end: trimEnd,
-                audioVolume: audioVolume,
-                tatarianVolume: tatarianVolume,
-                speaker: speaker,
+                audioVolume,
+                tatarianVolume,
+                speaker,
                 sourceLanguage: sourceLang,
                 targetLanguage: targetLang,
             })
@@ -37,38 +57,76 @@ export default function EditPage() {
         navigate("/export");
     };
 
+    const langLabelToCode = (label: string) => {
+        if (!label) return "ru";
+        if (label.toLowerCase().startsWith("рус")) return "ru";
+        if (label.toLowerCase().startsWith("тат")) return "tt";
+        if (label.toLowerCase().startsWith("анг")) return "en";
+        return "ru";
+    };
+
     return (
         <div className="min-h-screen flex flex-col items-center bg-gray-50">
             <div className="w-full max-w-6xl px-6 py-4">
-                <button onClick={() => navigate("/")} className="text-blue-600">
-                    ← Назад
-                </button>
+                <button onClick={() => navigate("/")} className="text-blue-600">← Назад</button>
             </div>
 
             <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl px-6">
-                <div className="flex-1 flex justify-center">
+                <div className="flex-1 flex flex-col items-center">
                     <VideoPlayer
                         trimStart={trimStart}
                         trimEnd={trimEnd}
-                        onTrimChange={(start: number, end: number) => {
-                            setTrimStart(start);
-                            setTrimEnd(end);
+                        onTrimChange={(s, e) => { setTrimStart(s); setTrimEnd(e); }}
+                        onTimeUpdate={(time) => {
+                            // ищем субтитр (объект)
+                            const found = subtitles.find(s => time >= s.start && time <= s.end);
+                            if (found) {
+                                setCurrentSub(found);
+                            } else {
+                                setCurrentSub(null);
+                            }
+                            // console.log("time", time, "found", !!found);
                         }}
                     />
+
+                    {/* Субтитры: две колонки */}
+                    <div className="w-4/4 mt-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-black/70 text-white px-4 py-3 rounded-lg text-sm shadow min-h-[56px]">
+                                <div className="text-xs text-gray-300 mb-1">{sourceLang}</div>
+                                <div>
+                                    {currentSub
+                                        ? (currentSub.text[langLabelToCode(sourceLang)] ||
+                                            currentSub.text.ru ||
+                                            currentSub.text.tt ||
+                                            currentSub.text.ar ||
+                                            "—")
+                                        : "—"}
+                                </div>
+                            </div>
+
+                            <div className="bg-black/70 text-green-200 px-4 py-3 rounded-lg text-sm shadow min-h-[56px]">
+                                <div className="text-xs text-gray-300 mb-1">{targetLang}</div>
+                                <div>
+                                    {currentSub
+                                        ? (currentSub.text[langLabelToCode(targetLang)] ||
+                                            "—")
+                                        : "—"}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* ПРАВАЯ колонка */}
                 <div className="flex flex-col gap-4 w-full md:w-72">
                     <button
-                        className="px-6 py-3 rounded-lg bg-gradient-to-r from-green-500
-                        to-emerald-600 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
+                        className="px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
                         onClick={handleTrimAndGoExport}
                     >
                         Обрезать
                     </button>
                     <button
-                        className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500
-                        to-pink-500 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
+                        className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
                         onClick={handleTrimAndGoExport}
                     >
                         Перевести видео
@@ -76,38 +134,17 @@ export default function EditPage() {
 
                     <div className="border-t border-gray-200 my-2" />
 
-                    {/* Слайдеры */}
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm text-gray-700">
-                            Громкость аудио ({audioVolume.toFixed(1)})
-                        </label>
-                        <input
-                            type="range"
-                            min={0}
-                            max={1}
-                            step={0.1}
-                            value={audioVolume}
-                            onChange={(e) => setAudioVolume(Number(e.target.value))}
-                            className="w-full accent-green-500"
-                        />
+                        <label className="text-sm text-gray-700">Громкость аудио ({audioVolume.toFixed(1)})</label>
+                        <input type="range" min={0} max={1} step={0.1} value={audioVolume} onChange={(e) => setAudioVolume(Number(e.target.value))} className="w-full accent-green-500" />
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm text-gray-700">
-                            Громкость татарского ({tatarianVolume.toFixed(1)})
-                        </label>
-                        <input
-                            type="range"
-                            min={0}
-                            max={1}
-                            step={0.1}
-                            value={tatarianVolume}
-                            onChange={(e) => setTatarianVolume(Number(e.target.value))}
-                            className="w-full accent-green-500"
-                        />
+                        <label className="text-sm text-gray-700">Громкость татарского ({tatarianVolume.toFixed(1)})</label>
+                        <input type="range" min={0} max={1} step={0.1} value={tatarianVolume} onChange={(e) => setTatarianVolume(Number(e.target.value))} className="w-full accent-green-500" />
                     </div>
 
-                    {/* Селекты на Headless UI */}
+                    {/* HeadlessUI Dropdown components (как у тебя) */}
                     <Dropdown label="Спикеры" options={speakers} value={speaker} onChange={setSpeaker} />
                     <Dropdown label="С какого языка" options={languages} value={sourceLang} onChange={setSourceLang} />
                     <Dropdown label="На какой язык" options={languages} value={targetLang} onChange={setTargetLang} />
@@ -117,7 +154,8 @@ export default function EditPage() {
     );
 }
 
-// 🔽 Кастомный компонент Dropdown
+
+// Dropdown остаётся как у тебя (Headless UI)
 function Dropdown({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (val: string) => void }) {
     return (
         <div className="flex flex-col gap-2">
@@ -133,13 +171,7 @@ function Dropdown({ label, options, value, onChange }: { label: string; options:
                                 key={option}
                                 value={option}
                                 className={({ active, selected }) =>
-                                    `cursor-pointer select-none p-2 ${
-                                        active
-                                            ? "bg-green-100 text-green-700"
-                                            : selected
-                                                ? "bg-green-50 text-green-600"
-                                                : "text-gray-700"
-                                    }`
+                                    `cursor-pointer select-none p-2 ${active ? "bg-green-100 text-green-700" : selected ? "bg-green-50 text-green-600" : "text-gray-700"}`
                                 }
                             >
                                 {option}

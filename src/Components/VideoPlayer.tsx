@@ -1,23 +1,21 @@
-import {useEffect, useRef, useState} from "react";
-import {useNavigate} from "react-router-dom";
-import * as React from "react";
-import TrimTimeLine from "./TrimTimeLine.tsx";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import TrimTimeLine from "./TrimTimeLine";
 
 interface VideoPlayerProps {
     trimStart: number;
     trimEnd: number;
     onTrimChange: (start: number, end: number) => void;
+    onTimeUpdate?: (time: number) => void;
 }
 
-const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => {
+const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPlayerProps) => {
     const navigate = useNavigate();
-    const videoRef = useRef(null);
-    const containerRef = useRef(null);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
-    // url видео берём из UploadPage
-    const [videoUrl] = useState(localStorage.getItem("uploadedVideo"));
+    const [videoUrl] = useState<string | null>(localStorage.getItem("uploadedVideo"));
 
-    // плеер: состояния
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -32,16 +30,18 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
         }
     }, [videoUrl, navigate]);
 
-    // подписки на события видео
     useEffect(() => {
-        const v: any = videoRef.current;
+        const v = videoRef.current;
         if (!v) return;
 
         const onTime = () => {
-            setCurrentTime(v.currentTime);
+            const t = v.currentTime;
+            setCurrentTime(t);
+            // вызываем callback наружу (чтобы EditPage мог искать субтитр)
+            onTimeUpdate?.(t);
 
-            // ⛔️ если дошли до trimEnd → стоп
-            if (v.currentTime >= trimEnd) {
+            // если дошли до trimEnd — стоп
+            if (trimEnd > 0 && t >= trimEnd) {
                 v.pause();
                 setIsPlaying(false);
             }
@@ -50,7 +50,7 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
         const onMeta = () => {
             const d = isFinite(v.duration) ? v.duration : 0;
             setDuration(d);
-            onTrimChange(0, d); // при загрузке видео
+            onTrimChange(0, d); // устанавливаем трим по умолчанию
         };
 
         v.addEventListener("timeupdate", onTime);
@@ -60,11 +60,10 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
             v.removeEventListener("timeupdate", onTime);
             v.removeEventListener("loadedmetadata", onMeta);
         };
-    }, [trimEnd, onTrimChange]);
+    }, [trimEnd, onTrimChange, onTimeUpdate]);
 
-    // применяем громкость/мьют/скорость
     useEffect(() => {
-        const v: any = videoRef.current;
+        const v = videoRef.current;
         if (!v) return;
         v.volume = volume;
         v.muted = muted;
@@ -72,11 +71,9 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
     }, [volume, muted, rate]);
 
     const togglePlay = () => {
-        const v:any = videoRef.current;
+        const v = videoRef.current;
         if (!v) return;
-
         if (v.paused) {
-            // 🎯 если вышли за пределы диапазона → стартуем с trimStart
             if (v.currentTime < trimStart || v.currentTime >= trimEnd) {
                 v.currentTime = trimStart;
             }
@@ -92,22 +89,19 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
         const t = Number(e.target.value);
         if (videoRef.current) videoRef.current.currentTime = t;
         setCurrentTime(t);
+        // и вызываем наружу
+        onTimeUpdate?.(t);
     };
 
     const handleMuteToggle = () => setMuted((m) => !m);
 
     const format = (t: number) => {
-        if (!t || isNaN(t)) return "00:00";
-        const mm = Math.floor(t / 60)
-            .toString()
-            .padStart(2, "0");
-        const ss = Math.floor(t % 60)
-            .toString()
-            .padStart(2, "0");
+        if (t == null || isNaN(t)) return "00:00";
+        const mm = Math.floor(t / 60).toString().padStart(2, "0");
+        const ss = Math.floor(t % 60).toString().padStart(2, "0");
         return `${mm}:${ss}`;
     };
 
-    // подсветка диапазона на таймлайне
     const pct = (x: number) => (duration > 0 ? (x / duration) * 100 : 0);
     const trackBg = `linear-gradient(
     to right,
@@ -123,11 +117,10 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
 
     return (
         <div className="w-full max-w-3xl">
-            {/* Видео с оверлеем */}
             <div
                 ref={containerRef}
                 className="relative bg-black rounded-lg overflow-hidden shadow-lg"
-                style={{aspectRatio: "16 / 9", maxHeight: "80vh"}}
+                style={{ aspectRatio: "16 / 9", maxHeight: "80vh" }}
             >
                 <video
                     ref={videoRef}
@@ -136,13 +129,10 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
                     controls={false}
                 />
 
-                {/* Контролы поверх видео */}
                 <div className="absolute inset-0 flex flex-col justify-end">
-                    {/* градиент снизу для читаемости */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"/>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
-                    <div className="relative z-10 p-4 space-y-3">
-                        {/* Таймлайн */}
+                    <div className="relative z-10 p-4 space-y-3 pointer-events-auto">
                         <input
                             type="range"
                             min={0}
@@ -151,23 +141,16 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
                             value={currentTime}
                             onChange={handleSeek}
                             className="w-full accent-blue-500"
-                            style={{background: trackBg}}
+                            style={{ background: trackBg }}
                         />
 
-                        {/* нижняя панель */}
                         <div className="flex items-center justify-between text-white text-sm">
                             <div className="flex items-center gap-3">
-                                <button
-                                    onClick={togglePlay}
-                                    className="p-2 rounded-md hover:bg-white/30"
-                                >
+                                <button onClick={togglePlay} className="p-2 rounded-md hover:bg-white/10">
                                     {isPlaying ? "⏸" : "▶️"}
                                 </button>
 
-                                <button
-                                    onClick={handleMuteToggle}
-                                    className="p-2 rounded-md hover:bg-white/30"
-                                >
+                                <button onClick={handleMuteToggle} className="p-2 rounded-md hover:bg-white/10">
                                     {muted || volume === 0 ? "🔇" : "🔊"}
                                 </button>
 
@@ -189,14 +172,14 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
                                 <select
                                     value={rate}
                                     onChange={(e) => setRate(Number(e.target.value))}
-                                    className="text-white p-1 rounded-lg"
+                                    className="text-white p-1 rounded-lg bg-black/20"
                                 >
-                                    <option value={0.5} className="bg-black rounded-lg">0.5x</option>
-                                    <option value={0.75} className="bg-black rounded-lg">0.75x</option>
-                                    <option value={1} className="bg-black rounded-lg">1x</option>
-                                    <option value={1.25} className="bg-black rounded-lg">1.25x</option>
-                                    <option value={1.5} className="bg-black rounded-lg">1.5x</option>
-                                    <option value={2} className="bg-black rounded-lg">2x</option>
+                                    <option value={0.5}>0.5x</option>
+                                    <option value={0.75}>0.75x</option>
+                                    <option value={1}>1x</option>
+                                    <option value={1.25}>1.25x</option>
+                                    <option value={1.5}>1.5x</option>
+                                    <option value={2}>2x</option>
                                 </select>
 
                                 <div className="ml-3 text-gray-200">
@@ -213,7 +196,7 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
                                             }
                                         }
                                     }}
-                                    className="gap-x-200 p-2 rounded-md hover:bg-white/30"
+                                    className="p-2 rounded-md hover:bg-white/10"
                                 >
                                     ⛶
                                 </button>
@@ -223,10 +206,10 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange }: VideoPlayerProps) => 
                 </div>
             </div>
 
-            <TrimTimeLine duration={duration} trimStart={trimStart} trimEnd={trimEnd} onTrimChange={onTrimChange}/>
-
+            {/* Полоска трима находится в компоненте TrimTimeLine */}
+            <TrimTimeLine duration={duration} trimStart={trimStart} trimEnd={trimEnd} onTrimChange={onTrimChange} />
         </div>
-    )
-}
+    );
+};
 
 export default VideoPlayer;
