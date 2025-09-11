@@ -1,7 +1,6 @@
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 import VideoPlayer from "./VideoPlayer.tsx";
-import {Listbox} from "@headlessui/react";
 
 const subtitles = [
     { start: 27.2, end: 33.42, lang: "ru", text: { ru: "Мы рады приветствовать гостей и участников восьмого Международного Золотардынского форума.", tt: "Сигезенче Халыкара Алтын Урда форумында катнашучыларны һәм кунакларны каршы алуыбызга шатбыз.", ar: "" } },
@@ -53,7 +52,7 @@ const VideoWithSubtitles = () => {
                 targetLanguage: targetLang,
             })
         );
-        navigate("/export");
+        navigate("/exportSub");
     };
 
     const langLabelToCode = (label: string) => {

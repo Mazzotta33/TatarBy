@@ -1,6 +1,11 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
+    const location = useLocation();
+
+    const isEditActive = location.pathname.startsWith('/edit');
+    const isExportActive = location.pathname.startsWith('/export');
+
     return (
         <div>
             <h1 className="
@@ -16,7 +21,7 @@ const Navbar = () => {
             <nav className="flex items-center justify-center p-4 bg-white">
                 <NavLink
                     to="/"
-                    className={({isActive}) =>
+                    className={({ isActive }) =>
                         `p-5 mx-4 border-b-2 ${isActive ? 'border-green-500 text-green-500 font-semibold' : 'border-transparent text-gray-500'}`
                     }
                 >
@@ -24,16 +29,16 @@ const Navbar = () => {
                 </NavLink>
                 <NavLink
                     to="/edit"
-                    className={({isActive}) =>
-                        `p-5 mx-4 border-b-2 ${isActive ? 'border-green-500 text-green-500 font-semibold' : 'border-transparent text-gray-500'}`
+                    className={() =>
+                        `p-5 mx-4 border-b-2 ${isEditActive ? 'border-green-500 text-green-500 font-semibold' : 'border-transparent text-gray-500'}`
                     }
                 >
                     Редактирование
                 </NavLink>
                 <NavLink
                     to="/export"
-                    className={({isActive}) =>
-                        `p-5 mx-4 border-b-2 ${isActive ? 'border-green-500 text-green-500 font-semibold' : 'border-transparent text-gray-500'}`
+                    className={() =>
+                        `p-5 mx-4 border-b-2 ${isExportActive ? 'border-green-500 text-green-500 font-semibold' : 'border-transparent text-gray-500'}`
                     }
                 >
                     Экспорт

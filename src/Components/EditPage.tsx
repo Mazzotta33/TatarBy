@@ -54,7 +54,7 @@ export default function EditPage() {
                 targetLanguage: targetLang,
             })
         );
-        navigate("/export");
+        navigate("/exportTranslate");
     };
 
     const langLabelToCode = (label: string) => {
