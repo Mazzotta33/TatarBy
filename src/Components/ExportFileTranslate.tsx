@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const DownloadIcon = () => (
@@ -9,13 +8,29 @@ const DownloadIcon = () => (
     </svg>
 );
 
+
+
 const ExportFileTranslate = () => {
     const navigate = useNavigate();
 
-    const handleDownloadVideo = () => {
-        console.log("Скачивание переведенного видео...");
-        // Здесь будет логика для скачивания файла
-        alert("Скачивание началось!");
+    const handleExportVideo = () => {
+        const videoUrl = localStorage.getItem("uploadedVideo");
+
+        if (!videoUrl) {
+            alert("Видео не найдено в localStorage");
+            return;
+        }
+
+        // создаём временную ссылку для скачивания
+        const link = document.createElement("a");
+        link.href = videoUrl;
+
+        // имя файла (можно задать любое)
+        link.download = "video.mp4";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     return (
@@ -27,7 +42,7 @@ const ExportFileTranslate = () => {
 
                 <div className="flex justify-center items-center gap-4 mt-50 mb-20">
                     <button
-                        onClick={handleDownloadVideo}
+                        onClick={handleExportVideo}
                         className="flex items-center px-10 py-5 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold text-lg shadow-lg hover:shadow-2xl hover:brightness-110 transition"
                     >
                         <DownloadIcon />

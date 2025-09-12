@@ -3,7 +3,6 @@ import { useState } from "react";
 import VideoPlayer from "./VideoPlayer";
 import { Listbox } from "@headlessui/react";
 
-// === Список субтитров (взял из твоего набора) ===
 const subtitles = [
     { start: 27.2, end: 33.42, lang: "ru", text: { ru: "Мы рады приветствовать гостей и участников восьмого Международного Золотардынского форума.", tt: "Сигезенче Халыкара Алтын Урда форумында катнашучыларны һәм кунакларны каршы алуыбызга шатбыз.", ar: "" } },
     { start: 33.42, end: 43.0, lang: "ru", text: { ru: "Они вносят существенный вклад в изучение истории как татарского народа, так и народов Республики Татарстан и в целом истории России.", tt: "Алар татар халкының, Татарстан Республикасы халыкларының һәм гомумән, Россия тарихының тарихын өйрәнүгә зур өлеш кертә.", ar: "" } },
@@ -80,7 +79,7 @@ export default function EditPage() {
                         trimEnd={trimEnd}
                         onTrimChange={(s, e) => { setTrimStart(s); setTrimEnd(e); }}
                         onTimeUpdate={(time) => {
-                            const found = subtitles.find(s => time >= s.start && time <= s.end);
+                            const found = subs.find(s => time >= s.start && time <= s.end);
                             if (found) {
                                 setCurrentSub(found);
                             } else {
@@ -157,7 +156,7 @@ export default function EditPage() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm text-gray-700">Громкость татарского
+                        <label className="text-sm text-gray-700">Громкость дубляжа
                             ({tatarianVolume.toFixed(1)})</label>
                         <input type="range" min={0} max={1} step={0.1} value={tatarianVolume}
                                onChange={(e) => setTatarianVolume(Number(e.target.value))}

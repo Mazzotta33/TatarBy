@@ -60,11 +60,11 @@ const UploadFile = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen w-full">
+        <div className="flex flex-col items-center justify-center h-full w-full">
             <div className="flex flex-col md:flex-row gap-8 w-full max-w-4xl justify-center">
                 {!loading ? (
                     <>
-                        <div className="flex-1 bg-white p-8 rounded-xl shadow-lg flex flex-col items-center border border-gray-200">
+                        <div className="flex-1 bg-white p-8 rounded-xl shadow-lg mt-30 flex flex-col items-center border border-gray-200">
                             <VideoIcon />
                             <h2 className="text-xl font-bold text-gray-800 mb-2">Перевести видео на татарский язык</h2>
                             <ul className="text-left text-sm text-gray-600 space-y-2 mb-8 w-full">
@@ -90,14 +90,14 @@ const UploadFile = () => {
                             />
                             <button
                                 onClick={handleVideoTranslate}
-                                className="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow hover:shadow-lg hover:brightness-105 transition mt-auto"
+                                className="w-full px-6 py-3 rounded-lg bg-gradient-to-r  from-green-500 to-emerald-600 text-white font-semibold shadow hover:shadow-lg hover:brightness-105 transition mt-auto"
                             >
                                 Перевести видео
                             </button>
                         </div>
 
                         {/* Карточка 2: Создание субтитров */}
-                        <div className="flex-1 bg-white p-8 rounded-xl shadow-lg flex flex-col items-center border border-gray-200">
+                        <div className="flex-1 bg-white p-8 rounded-xl shadow-lg flex flex-col mt-30 items-center border border-gray-200">
                             <SubtitlesIcon />
                             <h2 className="text-xl font-bold text-gray-800 mb-2">Создать субтитры на татарском языке</h2>
                             <ul className="text-left text-sm text-gray-600 space-y-2 mb-8 w-full">
