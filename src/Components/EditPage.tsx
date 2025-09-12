@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import VideoPlayer from "./VideoPlayer";
 import { Listbox } from "@headlessui/react";
+import { useVideoCutMutation } from "../Redux/api/videoApi.ts";
 
 const subtitles = [
     { start: 27.2, end: 33.42, lang: "ru", text: { ru: "Мы рады приветствовать гостей и участников восьмого Международного Золотардынского форума.", tt: "Сигезенче Халыкара Алтын Урда форумында катнашучыларны һәм кунакларны каршы алуыбызга шатбыз.", ar: "" } },
@@ -23,6 +24,9 @@ const subtitles = [
 
 export default function EditPage() {
     const navigate = useNavigate();
+
+    const [videoCut, { isLoading, isSuccess, isError, error }] = useVideoCutMutation();
+
 
     const [trimStart, setTrimStart] = useState(0);
     const [trimEnd, setTrimEnd] = useState(0);
@@ -54,6 +58,30 @@ export default function EditPage() {
             })
         );
         navigate("/exportTranslate");
+    };
+
+    const handleTrimVideo = async () => {
+        // Получаем URL видео, сохраненный в localStorage
+        const videoUrl = localStorage.getItem("originalVideo");
+        if (!videoUrl) {
+            console.error("URL видео не найден в localStorage.");
+            return;
+        }
+
+        try {
+            // 3. Вызываем мутацию с параметрами start и end из состояния
+            const response = await videoCut({
+                videoUrl,
+                start: trimStart, // передаем значение trimStart
+                end: trimEnd,     // передаем значение trimEnd
+            }).unwrap(); // .unwrap() позволяет обработать ошибки через try/catch
+
+            console.log("Видео успешно обрезано:", response);
+            // Можно добавить здесь логику для перехода на другую страницу
+            // или сохранения нового URL видео
+        } catch (err) {
+            console.error("Ошибка при обрезке видео:", err);
+        }
     };
 
     const langLabelToCode = (label: string) => {
@@ -135,9 +163,10 @@ export default function EditPage() {
                 <div className="flex flex-col gap-4 w-full md:w-72">
                     <button
                         className="px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
-                        onClick={handleTrimAndGoExport}
+                        onClick={handleTrimVideo}
+                        disabled={isLoading}
                     >
-                        Обрезать
+                        {isLoading ? "Обрезаем..." : "Обрезать"}
                     </button>
                     <button
                         className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
@@ -145,6 +174,9 @@ export default function EditPage() {
                     >
                         Перевести видео
                     </button>
+
+                    {isSuccess && <div className="text-green-600 mt-2">✅ Видео успешно обрезано!</div>}
+                    {isError && <div className="text-red-600 mt-2">❌ Ошибка: {JSON.stringify(error)}</div>}
 
                     <div className="border-t border-gray-200 my-2"/>
 
