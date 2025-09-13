@@ -1,15 +1,19 @@
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 import VideoPlayer from "./VideoPlayer.tsx";
-import {useMakeSubsMutation} from "../Redux/api/videoApi.ts";
+import {useMakeSubsMutation, useVideoCutMutation} from "../Redux/api/videoApi.ts";
 
 const subtitles = [];
 
 const VideoWithSubtitles = () => {
     const navigate = useNavigate();
     const [makeSubs, { isLoading: isMakingSubs, isSuccess: isMakeSubsSuccess, isError: isMakeSubsError, error: makeSubsError }] = useMakeSubsMutation();
-    const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(localStorage.getItem("originalVideo"));
 
+    const [videoCut, { isLoading, isSuccess, isError, error }] = useVideoCutMutation();
+
+    const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(
+        localStorage.getItem("currentVideo") || localStorage.getItem("originalVideo")
+    );
 
     const [trimStart, setTrimStart] = useState(0);
     const [trimEnd, setTrimEnd] = useState(0);
@@ -27,20 +31,29 @@ const VideoWithSubtitles = () => {
     const [subs, setSubs] = useState(subtitles);
     const [currentSub, setCurrentSub] = useState<null | { start: number; end: number; text: Record<string,string>; lang?: string }>(null);
 
-    const handleTrimAndGoExport = () => {
-        localStorage.setItem(
-            "trimRange",
-            JSON.stringify({
-                start: trimStart,
-                end: trimEnd,
-                audioVolume,
-                tatarianVolume,
-                speaker,
-                sourceLanguage: sourceLang,
-                targetLanguage: targetLang,
-            })
-        );
-        navigate("/exportSub");
+    const handleTrimVideo = async () => {
+        const videoUrl = localStorage.getItem("originalVideo");
+        if (!videoUrl) {
+            console.error("URL видео не найден в localStorage.");
+            return;
+        }
+
+        try {
+            const response  = await videoCut({ // Здесь 'response' переименован в 'videoUrl'
+                videoUrl,
+                startSeconds: trimStart,
+                endSeconds: trimEnd,
+            }).unwrap();
+
+            setCurrentVideoUrl(response.videoUrl); // Теперь используем саму строку, без .videoUrl
+            localStorage.setItem("currentVideo", response.videoUrl);
+            localStorage.setItem("originalVideo", response.videoUrl);
+
+            console.log("Видео успешно обрезано:", response);
+            console.log("Видео успешно обрезано:", response.videoUrl);
+        } catch (err) {
+            console.error("Ошибка при обрезке видео:", err);
+        }
     };
 
     const handleMakeSubs = async () => {
@@ -51,10 +64,10 @@ const VideoWithSubtitles = () => {
         }
 
         const subsListForBackend = subs.length > 0 ? subs.map(sub => ({
-            startSeconds: sub.start,
-            endSeconds: sub.end,
-            russianText: sub.text.ru,
-            tatarText: sub.text.tt,
+            start: sub.start,
+            end: sub.end,
+            text: sub.text.rus_Lath,
+            text_tat: sub.text.tat_Cyrl,
             language: sub.lang,
         })) : null;
 
@@ -72,9 +85,8 @@ const VideoWithSubtitles = () => {
             // Преобразуем полученные субтитры обратно в формат для фронтенда
             const formattedSubs = response.subtitlesList.map(sub => {
                 const textObject = {
-                    [langLabelToCode("Русский")]: sub.language === 'ru' ? sub.text : '',
-                    [langLabelToCode("Татарский")]: sub.text_tat,
-                    [langLabelToCode("Английский")]: sub.language === 'ar' ? sub.text : ''
+                    "rus_Lath": sub.text, // Использование text_rus из ответа
+                    "tat_Cyrl": sub.text_tat
                 };
 
                 return {
@@ -173,9 +185,10 @@ const VideoWithSubtitles = () => {
                 <div className="flex flex-col gap-4 w-full md:w-72">
                     <button
                         className="px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
-                        onClick={handleTrimAndGoExport}
+                        onClick={handleTrimVideo}
+                        disabled={isLoading}
                     >
-                        Обрезать
+                        {isLoading ? "Обрезаем..." : "Обрезать"}
                     </button>
                     <button
                         className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"

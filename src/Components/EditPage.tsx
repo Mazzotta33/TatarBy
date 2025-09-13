@@ -41,10 +41,10 @@ export default function EditPage() {
         }
 
         const subsListForBackend = subs.length > 0 ? subs.map(sub => ({
-            startSeconds: sub.start,
-            endSeconds: sub.end,
-            russianText: sub.text.ru,
-            tatarText: sub.text_tat,
+            start: sub.start,
+            end: sub.end,
+            text: sub.text.rus_Lath,
+            text_tat: sub.text.tat_Cyrl,
             language: sub.lang,
         })) : null;
 
@@ -72,9 +72,8 @@ export default function EditPage() {
 
             const formattedSubs = response.subtitlesList.map(sub => {
                 const textObject = {
-                    [langLabelToCode("Русский")]: sub.language === 'ru' ? sub.text : '',
-                    [langLabelToCode("Татарский")]: sub.text_tat,
-                    [langLabelToCode("Английский")]: sub.language === 'ar' ? sub.text : ''
+                    "rus_Lath": sub.text, // Использование text_rus из ответа
+                    "tat_Cyrl": sub.text_tat
                 };
 
                 return {

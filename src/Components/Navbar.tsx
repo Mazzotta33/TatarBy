@@ -3,43 +3,42 @@ import { NavLink, useLocation } from 'react-router-dom';
 const Navbar = () => {
     const location = useLocation();
 
-    const isEditActive = location.pathname.startsWith('/edit');
-    const isExportActive = location.pathname.startsWith('/export');
+    // Функция для определения активного пути
+    const isActiveLink = (path: string) => {
+        if (path === '/') {
+            return location.pathname === '/';
+        }
+        return location.pathname.startsWith(path);
+    };
 
     return (
         <div>
-            <h1 className="
-            flex items-center justify-center bg-white shadow text-green-600 text-3xl font-bold
-            ">
-                TatTranslate
-                <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Flag_of_Tatarstan.svg/640px-Flag_of_Tatarstan.svg.png"
-                    alt="Флаг Татарстана"
-                    className="w-8 h-6 rounded-sm shadow"
-                />
-            </h1>
-            <nav className="flex items-center justify-center p-4 bg-white">
+            <div className="flex items-center justify-center bg-white shadow py-4">
+                <h1 className="text-3xl font-bold text-green-600 flex items-center">
+                    TatTranslate
+                    <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Flag_of_Tatarstan.svg/640px-Flag_of_Tatarstan.svg.png"
+                        alt="Флаг Татарстана"
+                        className="w-8 h-6 rounded-sm shadow-md ml-2"
+                    />
+                </h1>
+            </div>
+            <nav className="flex items-center justify-center p-4 bg-white shadow-sm">
                 <NavLink
                     to="/"
-                    className={({ isActive }) =>
-                        `p-5 mx-4 border-b-2 ${isActive ? 'border-green-500 text-green-500 font-semibold' : 'border-transparent text-gray-500'}`
-                    }
+                    className={isActiveLink('/') ? 'p-5 mx-4 border-b-2 border-green-500 text-green-500 font-semibold transition-colors duration-200' : 'p-5 mx-4 border-b-2 border-transparent text-gray-500 hover:text-green-500 transition-colors duration-200'}
                 >
                     Загрузка
                 </NavLink>
                 <NavLink
                     to="/edit"
-                    className={() =>
-                        `p-5 mx-4 border-b-2 ${isEditActive ? 'border-green-500 text-green-500 font-semibold' : 'border-transparent text-gray-500'}`
-                    }
+                    className={isActiveLink('/edit') ? 'p-5 mx-4 border-b-2 border-green-500 text-green-500 font-semibold transition-colors duration-200' : 'p-5 mx-4 border-b-2 border-transparent text-gray-500 hover:text-green-500 transition-colors duration-200'}
                 >
                     Редактирование
                 </NavLink>
                 <NavLink
                     to="/export"
-                    className={() =>
-                        `p-5 mx-4 border-b-2 ${isExportActive ? 'border-green-500 text-green-500 font-semibold' : 'border-transparent text-gray-500'}`
-                    }
+                    className={isActiveLink('/export') ? 'p-5 mx-4 border-b-2 border-green-500 text-green-500 font-semibold transition-colors duration-200' : 'p-5 mx-4 border-b-2 border-transparent text-gray-500 hover:text-green-500 transition-colors duration-200'}
                 >
                     Экспорт
                 </NavLink>
