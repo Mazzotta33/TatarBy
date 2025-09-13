@@ -2,6 +2,43 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+interface Subtitle {
+    startSeconds: number;
+    endSeconds: number;
+    russianText: string;
+    tatarText: string;
+    language: string;
+}
+interface TranslateParams {
+    audioVolume: number;
+    tatarAudioVolume: number;
+    speaker: string;
+    translateFrom: string;
+    translateTo: string;
+}
+interface TranslateRequestBody {
+    videoUrl: string;
+    params: TranslateParams;
+    subtitlesList: Subtitle[] | null;
+}
+
+interface TranslateResponse {
+    videoUrl: string;
+    params: TranslateParams;
+    subtitlesList: Subtitle[];
+}
+
+interface MakeSubsRequestBody {
+    videoUrl: string;
+    subtitlesList: Subtitle[] | null;
+}
+
+// Интерфейс для ответа бэкенда на создание субтитров
+interface MakeSubsResponse {
+    videoUrl: string;
+    subtitlesList: Subtitle[];
+}
+
 export const videoApi = createApi({
     reducerPath: 'videoApi',
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8080/api' }),
@@ -15,6 +52,7 @@ export const videoApi = createApi({
                     url: "/video/upload", // как в картинке
                     method: "POST",
                     body: formData,
+                    responseHandler: (response) => response.text()
                 };
             },
         }),
@@ -24,11 +62,27 @@ export const videoApi = createApi({
                 method: "POST",
                 body: { videoUrl, start, end },
             }),
-        })
+        }),
+        translateVideo: builder.mutation<TranslateResponse, TranslateRequestBody>({
+            query: (body) => ({
+                url: "/video/translate",
+                method: "POST",
+                body,
+            }),
+        }),
+        makeSubs: builder.mutation<MakeSubsResponse, MakeSubsRequestBody>({
+            query: (body) => ({
+                url: "/video/make-subs",
+                method: "POST",
+                body,
+            }),
+        }),
     }),
 });
 
 export const {
     useUploadVideoMutation,
-    useVideoCutMutation
+    useVideoCutMutation,
+    useTranslateVideoMutation,
+    useMakeSubsMutation,
 } = videoApi;

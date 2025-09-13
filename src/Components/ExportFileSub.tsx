@@ -35,7 +35,7 @@ const ExportFileSub = () => {
     const navigate = useNavigate();
 
     const handleExportVideo = () => {
-        const videoUrl = localStorage.getItem("uploadedVideo");
+        const videoUrl = localStorage.getItem("currentVideo");
         if (!videoUrl) {
             alert("Видео не найдено в localStorage");
             return;

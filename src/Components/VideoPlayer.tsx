@@ -3,18 +3,19 @@ import { useNavigate } from "react-router-dom";
 import TrimTimeLine from "./TrimTimeLine";
 
 interface VideoPlayerProps {
+    videoUrl: string | null;
     trimStart: number;
     trimEnd: number;
     onTrimChange: (start: number, end: number) => void;
     onTimeUpdate?: (time: number) => void;
 }
 
-const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPlayerProps) => {
+const VideoPlayer = ({ videoUrl, trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPlayerProps) => {
     const navigate = useNavigate();
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
-
-    const [videoUrl] = useState<string | null>(localStorage.getItem("uploadedVideo"));
+    //
+    // const [videoUrl] = useState<string | null>(localStorage.getItem("currentVideo"));
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -25,6 +26,17 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPl
 
     const [showControls, setShowControls] = useState(false);
     const hideTimerRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        const v = videoRef.current;
+        if (v && videoUrl) {
+            v.src = videoUrl;
+            v.load();
+            v.currentTime = 0;
+            setIsPlaying(false);
+            setCurrentTime(0);
+        }
+    }, [videoUrl]);
 
     useEffect(() => {
         if (!videoUrl) {
@@ -162,6 +174,7 @@ const VideoPlayer = ({ trimStart, trimEnd, onTrimChange, onTimeUpdate }: VideoPl
                 onMouseLeave={onMouseLeave}
             >
                 <video
+                    key={videoUrl}
                     ref={videoRef}
                     src={videoUrl}
                     className="w-full h-full object-contain bg-black"

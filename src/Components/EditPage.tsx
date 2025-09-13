@@ -2,31 +2,18 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import VideoPlayer from "./VideoPlayer";
 import { Listbox } from "@headlessui/react";
-import { useVideoCutMutation } from "../Redux/api/videoApi.ts";
+import { useTranslateVideoMutation, useVideoCutMutation } from "../Redux/api/videoApi.ts";
 
-const subtitles = [
-    { start: 27.2, end: 33.42, lang: "ru", text: { ru: "Мы рады приветствовать гостей и участников восьмого Международного Золотардынского форума.", tt: "Сигезенче Халыкара Алтын Урда форумында катнашучыларны һәм кунакларны каршы алуыбызга шатбыз.", ar: "" } },
-    { start: 33.42, end: 43.0, lang: "ru", text: { ru: "Они вносят существенный вклад в изучение истории как татарского народа, так и народов Республики Татарстан и в целом истории России.", tt: "Алар татар халкының, Татарстан Республикасы халыкларының һәм гомумән, Россия тарихының тарихын өйрәнүгә зур өлеш кертә.", ar: "" } },
-    { start: 46.7, end: 57.5, lang: "ru", text: { ru: "Лусджучи или Золотая Орда является неотлеваемой частью российского культурного пространства и является частью общероссийского прошлого.", tt: "Лусджучи, ягъни Алтын Урда, Россия мәдәниятенең аерылгысыз өлеше булып тора һәм гомумроссия үткәненең өлеше булып тора.", ar: "" } },
-    { start: 59.7, end: 64.18, lang: "ar", text: { ar: "في الواقع أنا مسرور جداً للمشاركة في هذا المؤتمر الدولي", ru: "", tt: "" } },
-    { start: 64.18, end: 73.0, lang: "ar", text: { ar: "ولقد حسني الشرف بأن أكون من الشخصيات التي شدت الرحال من أقصى الغرب الإسلامي إلى أسير وسطة وبالضبط إلى قزان", ru: "", tt: "" } },
-    { start: 74.0, end: 87.3, lang: "ru", text: { ru: "Для меня, во-первых, произвело серьезное впечатление количество участников, среди них достаточно большой состав известных людей, историков. Когда у человека есть сильные корни, он всегда в этой жизни будет уверенно стоять на своих ногах.", tt: "Минем өчен, беренчедән, катнашучыларның саны, шул исәптән билгеле кешеләр, тарихчылар саны да шактый зур иде, чөнки кешенең тамырлары нык булгач, ул бу тормышта һәрвакыт үз аякларында ышаныч белән торачак.", ar: "" } },
-    { start: 95.0, end: 98.4, lang: "ru", text: { ru: "В истории не бывает однозначно хорошего или плохого явления.", tt: "Тарихта бернинди дә яхшы яки начар күренешләр юк.", ar: "" } },
-    { start: 99.4, end: 105.0, lang: "ru", text: { ru: "Мы из любого явления должны извлекать уроки для того, чтобы идти дальше.", tt: "Алга таба барыр өчен, без һәркайсы күренештән сабак алырга тиеш.", ar: "" } },
-    { start: 114.0, end: 129.2, lang: "ru", text: { ru: "Золото-Арденский форум – это мероприятие, которое имеет уже в международном масштабе хороший отклик, хорошо известное и, наверное, одно из главных научных мероприятий по тематике истории средних веков евразийского пространства.", tt: "Алтын-Ардэн форумы - халыкара дәрәҗәдә яхшы кабул ителгән, яхшы билгеле һәм, бәлки, Евразия киңлегенең урта гасырлар тарихы темасына багышланган төп фәнни чараларның берсе.", ar: "" } },
-    { start: 133.6, end: 139.04, lang: "ru", text: { ru: "Золотая Орда и Лос-Джучи – это те основы, на которых", tt: "Алтын Урда һәм Лос-Джучи - бу нигезләр.", ar: "" } },
-    { start: 139.04, end: 141.4, lang: "ru", text: { ru: "построена государственность многих наших стран.", tt: "Күп кенә илләребезнең дәүләтчелеге төзелгән.", ar: "" } },
-    { start: 162.5, end: 167.84, lang: "ru", text: { ru: "Международный Золотардынский форум – это уже такой бренд для всех специалистов,", tt: "Халыкара Алтын Урда форумы инде барлык белгечләр өчен шундый бренд.", ar: "" } },
-    { start: 168.04, end: 171.66, lang: "ru", text: { ru: "кто занимается золотардынским периодом, периодом татарских ханцев,", tt: "Алтын чоры, татар ханнары чоры,", ar: "" } },
-    { start: 171.78, end: 174.5, lang: "ru", text: { ru: "для тех, кто занимается средними веками.", tt: "урта гасырлар белән шөгыльләнүчеләр өчен.", ar: "" } },
-    { start: 176.4, end: 184.0, lang: "ru", text: { ru: "И мы, конечно, как организаторы, всегда готовы принять наших уважаемых коллег в Казани, в Булгарии, в Татарстане.", tt: "Һәм без, әлбәттә, оештыручылар буларак, Казанда, Болгариядә, Татарстанда хөрмәтле хезмәттәшләребезне кабул итәргә һәрвакыт әзер.", ar: "" } },
-];
+// Удален начальный массив subtitles, так как он будет приходить с бэкенда
+const subtitles = [];
 
 export default function EditPage() {
     const navigate = useNavigate();
 
+    const [translateVideo, { isLoading: isTranslating, isSuccess: isTranslateSuccess, isError: isTranslateError, error: translateError }] = useTranslateVideoMutation();
     const [videoCut, { isLoading, isSuccess, isError, error }] = useVideoCutMutation();
 
+    const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(localStorage.getItem("originalVideo"));
 
     const [trimStart, setTrimStart] = useState(0);
     const [trimEnd, setTrimEnd] = useState(0);
@@ -34,34 +21,92 @@ export default function EditPage() {
     const [audioVolume, setAudioVolume] = useState(1);
     const [tatarianVolume, setTatarianVolume] = useState(1);
 
-    const speakers = ["Алмаз", "Алсу"];
+    const speakers = ["almaz", "alsu"];
     const [speaker, setSpeaker] = useState(speakers[0]);
 
     const languages = ["Русский", "Татарский", "Английский"];
     const [sourceLang, setSourceLang] = useState(languages[0]);
     const [targetLang, setTargetLang] = useState(languages[1]);
 
+    // Изначально пустой массив субтитров
     const [subs, setSubs] = useState(subtitles);
     const [currentSub, setCurrentSub] = useState<null | { start: number; end: number; text: Record<string,string>; lang?: string }>(null);
 
-    const handleTrimAndGoExport = () => {
-        localStorage.setItem(
-            "trimRange",
-            JSON.stringify({
-                start: trimStart,
-                end: trimEnd,
-                audioVolume,
-                tatarianVolume,
-                speaker,
-                sourceLanguage: sourceLang,
-                targetLanguage: targetLang,
-            })
-        );
-        navigate("/exportTranslate");
+    // Новая функция для перевода
+    const handleTranslateAndGoExport = async () => {
+        const videoUrl = localStorage.getItem("originalVideo");
+        if (!videoUrl) {
+            console.error("URL видео не найден в localStorage.");
+            return;
+        }
+
+        // Преобразуем субтитры из вашего текущего формата в формат бэкенда
+        const subsListForBackend = subs.length > 0 ? subs.map(sub => ({
+            startSeconds: sub.start,
+            endSeconds: sub.end,
+            russianText: sub.text.ru,
+            tatarText: sub.text_tat,
+            language: sub.lang,
+        })) : null; // Отправляем null, если субтитры пустые
+
+        console.log("Субтитры перед POST-запросом:", subsListForBackend);
+
+        try {
+            const response = await translateVideo({
+                videoUrl,
+                params: {
+                    audioVolume,
+                    tatarAudioVolume: tatarianVolume,
+                    speaker,
+                    translateFrom: langLabelToCode(sourceLang),
+                    translateTo: langLabelToCode(targetLang),
+                },
+                subtitlesList: subsListForBackend,
+            }).unwrap();
+
+            // Сохраняем URL переведенного видео
+            setCurrentVideoUrl(response.videoUrl);
+            localStorage.setItem("currentVideo", response.videoUrl);
+
+            console.log("Данные субтитров, полученные от бэкенда:", response.subtitlesList);
+
+            const formattedSubs = response.subtitlesList.map(sub => {
+                const textObject = {
+                    [langLabelToCode("Русский")]: sub.language === 'ru' ? sub.text : '',
+                    [langLabelToCode("Татарский")]: sub.text_tat,
+                    [langLabelToCode("Английский")]: sub.language === 'ar' ? sub.text : ''
+                };
+
+                return {
+                    start: sub.start,
+                    end: sub.end,
+                    text: textObject,
+                    lang: sub.language
+                };
+            });
+
+            setSubs(formattedSubs);
+            console.log("Состояние 'subs' после обновления:", formattedSubs);
+
+            // setSubs(response.subtitlesList);
+            // console.log("Состояние 'subs' после обновления:", response.subtitlesList);
+
+        } catch (err) {
+            console.error("Ошибка при переводе видео:", err);
+        }
+    };
+
+    // Новая функция для перехода на страницу экспорта
+    const handleGoToExportPage = () => {
+        if (currentVideoUrl) {
+            localStorage.setItem("currentVideo", currentVideoUrl);
+            navigate("/exportTranslate");
+        } else {
+            console.error("Переведенное видео еще не готово.");
+        }
     };
 
     const handleTrimVideo = async () => {
-        // Получаем URL видео, сохраненный в localStorage
         const videoUrl = localStorage.getItem("originalVideo");
         if (!videoUrl) {
             console.error("URL видео не найден в localStorage.");
@@ -69,16 +114,17 @@ export default function EditPage() {
         }
 
         try {
-            // 3. Вызываем мутацию с параметрами start и end из состояния
             const response = await videoCut({
                 videoUrl,
-                start: trimStart, // передаем значение trimStart
-                end: trimEnd,     // передаем значение trimEnd
-            }).unwrap(); // .unwrap() позволяет обработать ошибки через try/catch
+                start: trimStart,
+                end: trimEnd,
+            }).unwrap();
+
+            // Если нужно, сохраните обрезанный URL в localStorage
+            setCurrentVideoUrl(response);
+            localStorage.setItem("currentVideo", response);
 
             console.log("Видео успешно обрезано:", response);
-            // Можно добавить здесь логику для перехода на другую страницу
-            // или сохранения нового URL видео
         } catch (err) {
             console.error("Ошибка при обрезке видео:", err);
         }
@@ -86,8 +132,8 @@ export default function EditPage() {
 
     const langLabelToCode = (label: string) => {
         if (!label) return "ru";
-        if (label.toLowerCase().startsWith("рус")) return "ru";
-        if (label.toLowerCase().startsWith("тат")) return "tt";
+        if (label.toLowerCase().startsWith("рус")) return "rus_Lath";
+        if (label.toLowerCase().startsWith("тат")) return "tat_Cyrl";
         if (label.toLowerCase().startsWith("анг")) return "en";
         return "ru";
     };
@@ -103,6 +149,7 @@ export default function EditPage() {
             <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl px-6">
                 <div className="flex-1 flex flex-col items-center">
                     <VideoPlayer
+                        videoUrl={currentVideoUrl}
                         trimStart={trimStart}
                         trimEnd={trimEnd}
                         onTrimChange={(s, e) => { setTrimStart(s); setTrimEnd(e); }}
@@ -170,13 +217,26 @@ export default function EditPage() {
                     </button>
                     <button
                         className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
-                        onClick={handleTrimAndGoExport}
+                        onClick={handleTranslateAndGoExport}
+                        disabled={isTranslating}
                     >
-                        Перевести видео
+                        {isTranslating ? "Переводим..." : "Перевести видео"}
+                    </button>
+
+                    {/* Кнопка "Экспорт" будет доступна только после успешного перевода */}
+                    <button
+                        className="px-6 py-3 rounded-lg bg-gray-400 text-white font-semibold shadow"
+                        onClick={handleGoToExportPage}
+                        disabled={!currentVideoUrl} // Отключаем, если URL не готов
+                    >
+                        Перейти к экспорту
                     </button>
 
                     {isSuccess && <div className="text-green-600 mt-2">✅ Видео успешно обрезано!</div>}
                     {isError && <div className="text-red-600 mt-2">❌ Ошибка: {JSON.stringify(error)}</div>}
+
+                    {isTranslateSuccess && <div className="text-green-600 mt-2">✅ Видео успешно переведено!</div>}
+                    {isTranslateError && <div className="text-red-600 mt-2">❌ Ошибка перевода: {JSON.stringify(translateError)}</div>}
 
                     <div className="border-t border-gray-200 my-2"/>
 
@@ -198,17 +258,17 @@ export default function EditPage() {
                     <div className="flex flex-col gap-2">
                         <label className="text-sm text-gray-700">Спикеры</label>
                         <div className="flex gap-2">
-                            {["Алмаз", "Алсу"].map((sp) => (
+                            {["Алмаз", "Алсу"].map((spLabel, index) => (
                                 <button
-                                    key={sp}
-                                    onClick={() => setSpeaker(sp)}
+                                    key={speakers[index]}
+                                    onClick={() => setSpeaker(speakers[index])}
                                     className={`flex-1 px-4 py-2 rounded-lg font-medium border transition ${
-                                        speaker === sp
+                                        speaker === speakers[index]
                                             ? "bg-green-500 text-white border-green-600"
                                             : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
                                     }`}
                                 >
-                                    {sp}
+                                    {spLabel}
                                 </button>
                             ))}
                         </div>

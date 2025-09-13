@@ -40,7 +40,11 @@ const UploadFile = () => {
             localStorage.setItem("originalVideo", videoUrl);
             localStorage.setItem("currentVideo", videoUrl);
 
+            console.log(`Загрузка успешно завершена. Попытка навигации по пути: ${targetPath}`);
+
             navigate(targetPath);
+
+            console.log(`Навигация вызвана.`);
         } catch (err) {
             console.error("Ошибка загрузки:", err);
         }
@@ -71,7 +75,7 @@ const UploadFile = () => {
                                 type="file"
                                 accept="video/*"
                                 ref={fileInputRef}
-                                onChange={(e) => handleFileChange(e, "./edit")}
+                                onChange={(e) => handleFileChange(e, "/edit")}
                                 className="hidden"
                             />
                             <button
@@ -94,7 +98,7 @@ const UploadFile = () => {
                                 type="file"
                                 accept="video/*"
                                 ref={fileInputRefSubtitles}
-                                onChange={(e) => handleFileChange(e, "./editSub")}
+                                onChange={(e) => handleFileChange(e, "/editSub")}
                                 className="hidden"
                             />
                             <button
