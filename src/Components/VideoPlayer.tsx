@@ -38,12 +38,12 @@ const VideoPlayer = ({ videoUrl, trimStart, trimEnd, onTrimChange, onTimeUpdate 
         }
     }, [videoUrl]);
 
-    useEffect(() => {
-        if (!videoUrl) {
-            navigate("/");
-            return;
-        }
-    }, [videoUrl, navigate]);
+    // useEffect(() => {
+    //     if (!videoUrl) {
+    //         navigate("/");
+    //         return;
+    //     }
+    // }, [videoUrl, navigate]);
 
     useEffect(() => {
         const v = videoRef.current;

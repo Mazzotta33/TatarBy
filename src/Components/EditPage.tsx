@@ -13,7 +13,9 @@ export default function EditPage() {
     const [translateVideo, { isLoading: isTranslating, isSuccess: isTranslateSuccess, isError: isTranslateError, error: translateError }] = useTranslateVideoMutation();
     const [videoCut, { isLoading, isSuccess, isError, error }] = useVideoCutMutation();
 
-    const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(localStorage.getItem("originalVideo"));
+    const [currentVideoUrl, setCurrentVideoUrl] = useState<string | null>(
+        localStorage.getItem("currentVideo") || localStorage.getItem("originalVideo")
+    );
 
     const [trimStart, setTrimStart] = useState(0);
     const [trimEnd, setTrimEnd] = useState(0);
@@ -28,11 +30,9 @@ export default function EditPage() {
     const [sourceLang, setSourceLang] = useState(languages[0]);
     const [targetLang, setTargetLang] = useState(languages[1]);
 
-    // Изначально пустой массив субтитров
     const [subs, setSubs] = useState(subtitles);
     const [currentSub, setCurrentSub] = useState<null | { start: number; end: number; text: Record<string,string>; lang?: string }>(null);
 
-    // Новая функция для перевода
     const handleTranslateAndGoExport = async () => {
         const videoUrl = localStorage.getItem("originalVideo");
         if (!videoUrl) {
@@ -40,14 +40,13 @@ export default function EditPage() {
             return;
         }
 
-        // Преобразуем субтитры из вашего текущего формата в формат бэкенда
         const subsListForBackend = subs.length > 0 ? subs.map(sub => ({
             startSeconds: sub.start,
             endSeconds: sub.end,
             russianText: sub.text.ru,
             tatarText: sub.text_tat,
             language: sub.lang,
-        })) : null; // Отправляем null, если субтитры пустые
+        })) : null;
 
         console.log("Субтитры перед POST-запросом:", subsListForBackend);
 
@@ -64,10 +63,11 @@ export default function EditPage() {
                 subtitlesList: subsListForBackend,
             }).unwrap();
 
-            // Сохраняем URL переведенного видео
             setCurrentVideoUrl(response.videoUrl);
             localStorage.setItem("currentVideo", response.videoUrl);
 
+            console.log("Видео успешно обрезано:", response.videoUrl);
+            console.log("Видео успешно обрезано:", response);
             console.log("Данные субтитров, полученные от бэкенда:", response.subtitlesList);
 
             const formattedSubs = response.subtitlesList.map(sub => {
@@ -87,16 +87,11 @@ export default function EditPage() {
 
             setSubs(formattedSubs);
             console.log("Состояние 'subs' после обновления:", formattedSubs);
-
-            // setSubs(response.subtitlesList);
-            // console.log("Состояние 'subs' после обновления:", response.subtitlesList);
-
         } catch (err) {
             console.error("Ошибка при переводе видео:", err);
         }
     };
 
-    // Новая функция для перехода на страницу экспорта
     const handleGoToExportPage = () => {
         if (currentVideoUrl) {
             localStorage.setItem("currentVideo", currentVideoUrl);
@@ -114,17 +109,18 @@ export default function EditPage() {
         }
 
         try {
-            const response = await videoCut({
+            const response  = await videoCut({ // Здесь 'response' переименован в 'videoUrl'
                 videoUrl,
-                start: trimStart,
-                end: trimEnd,
+                startSeconds: trimStart,
+                endSeconds: trimEnd,
             }).unwrap();
 
-            // Если нужно, сохраните обрезанный URL в localStorage
-            setCurrentVideoUrl(response);
-            localStorage.setItem("currentVideo", response);
+            setCurrentVideoUrl(response.videoUrl); // Теперь используем саму строку, без .videoUrl
+            localStorage.setItem("currentVideo", response.videoUrl);
+            localStorage.setItem("originalVideo", response.videoUrl);
 
             console.log("Видео успешно обрезано:", response);
+            console.log("Видео успешно обрезано:", response.videoUrl);
         } catch (err) {
             console.error("Ошибка при обрезке видео:", err);
         }

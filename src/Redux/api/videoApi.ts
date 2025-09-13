@@ -56,11 +56,11 @@ export const videoApi = createApi({
                 };
             },
         }),
-        videoCut: builder.mutation<string, { videoUrl: string; start: number; end: number }>({
-            query: ({ videoUrl, start, end }) => ({
+        videoCut: builder.mutation<string, { videoUrl: string; startSeconds: number; endSeconds: number }>({
+            query: ({ videoUrl, startSeconds, endSeconds  }) => ({
                 url: "/video/cut",
                 method: "POST",
-                body: { videoUrl, start, end },
+                body: { videoUrl, startSeconds, endSeconds },
             }),
         }),
         translateVideo: builder.mutation<TranslateResponse, TranslateRequestBody>({
