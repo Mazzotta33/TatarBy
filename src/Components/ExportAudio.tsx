@@ -26,10 +26,6 @@ const ExportFileTranslate = () => {
 
     const [subtitles, setSubtitles] = useState([]);
 
-    // Получаем текущий язык из Redux и создаем функцию-переводчик
-    const currentLanguage = useSelector(state => state.language.current);
-    const t = (key) => translations[currentLanguage][key];
-
     useEffect(() => {
         const subtitlesDataString = localStorage.getItem("subtitlesData");
         if (subtitlesDataString) {
@@ -37,25 +33,24 @@ const ExportFileTranslate = () => {
         }
     }, []);
 
-    const handleExportVideo = () => {
-        const videoUrl = localStorage.getItem("currentVideo");
+    // Получаем текущий язык из Redux и создаем функцию-переводчик
+    const currentLanguage = useSelector(state => state.language.current);
+    const t = (key) => translations[currentLanguage][key];
 
-        if (!videoUrl) {
-            alert(t('video_not_found_alert'));
-            return;
+    const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(() => {
+        let url = localStorage.getItem("currentAudio") || localStorage.getItem("originalAudio");
+
+        if (url) {
+            try {
+                const parsed = JSON.parse(url);
+                if (parsed && typeof parsed === "object" && parsed.audioUrl) {
+                    url = parsed.audioUrl;
+                }
+            } catch (e) {
+            }
         }
-
-        // создаём временную ссылку для скачивания
-        const link = document.createElement("a");
-        link.href = videoUrl;
-
-        // имя файла (можно задать любое)
-        link.download = "video.mp4";
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+        return url;
+    });
 
     const handleDownloadSubtitles = async () => {
         if (subtitles.length === 0) {
@@ -97,11 +92,27 @@ const ExportFileTranslate = () => {
         saveAs(blob, "subtitles.docx");
     };
 
-    const handleShare = () => {
-        const videoUrl = localStorage.getItem("currentVideo");
+    const handleExportAudio = () => {
+        if (!currentAudioUrl) {
+            alert(t('video_not_found_alert'));
+            return;
+        }
 
-        if (videoUrl) {
-            navigator.clipboard.writeText(videoUrl).then(() => {
+        // создаём временную ссылку для скачивания
+        const link = document.createElement("a");
+        link.href = currentAudioUrl;
+
+        // имя файла (можно задать любое)
+        link.download = "audio.mp3";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleShare = () => {
+        if (currentAudioUrl) {
+            navigator.clipboard.writeText(currentAudioUrl).then(() => {
                 setAlertMessage(t('link_copied_alert'));
                 setTimeout(() => setAlertMessage(""), 3000); // Уведомление исчезнет через 3 секунды
             }).catch(err => {
@@ -134,13 +145,13 @@ const ExportFileTranslate = () => {
                     </button>
                 </div>
 
-                <div className="flex justify-center items-center gap-4  mb-20">
+                <div className="flex justify-center items-center gap-4 mb-20">
                     <button
-                        onClick={handleExportVideo}
+                        onClick={handleExportAudio}
                         className="flex items-center px-10 py-5 rounded-2xl bg-gradient-to-r bg-green-600 text-white font-bold text-lg shadow-lg hover:shadow-2xl hover:brightness-110 transition"
                     >
                         <DownloadIcon/>
-                        {t('download_video_btn')}
+                        {t('audioDownload')}
                     </button>
                     <div className="flex justify-center items-center gap-4 mt-30 mb-20">
                         <button

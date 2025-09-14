@@ -22,6 +22,19 @@ interface TranslateRequestBody {
     subtitlesList: Subtitle[] | null;
 }
 
+interface TranslateAudioRequestBody {
+    audioUrl: string;
+    params: TranslateParams;
+    subtitlesList: Subtitle[] | null;
+}
+
+// 👈 Новый интерфейс для ответа на перевод аудио
+interface TranslateAudioResponse {
+    audioUrl: string;
+    params: TranslateParams;
+    subtitlesList: Subtitle[];
+}
+
 interface TranslateResponse {
     videoUrl: string;
     params: TranslateParams;
@@ -56,6 +69,19 @@ export const videoApi = createApi({
                 };
             },
         }),
+        uploadAudio: builder.mutation<string, File>({
+            query: (file) => {
+                const formData = new FormData();
+                formData.append("file", file); // ключ как в Swagger
+
+                return {
+                    url: "/audio/upload", // Указываем URL для аудио
+                    method: "POST",
+                    body: formData,
+                    responseHandler: (response) => response.text()
+                };
+            },
+        }),
         videoCut: builder.mutation<string, { videoUrl: string; startSeconds: number; endSeconds: number }>({
             query: ({ videoUrl, startSeconds, endSeconds  }) => ({
                 url: "/video/cut",
@@ -66,6 +92,13 @@ export const videoApi = createApi({
         translateVideo: builder.mutation<TranslateResponse, TranslateRequestBody>({
             query: (body) => ({
                 url: "/video/translate",
+                method: "POST",
+                body,
+            }),
+        }),
+        translateAudio: builder.mutation<TranslateAudioResponse, TranslateAudioRequestBody>({
+            query: (body) => ({
+                url: "/audio/translate",
                 method: "POST",
                 body,
             }),
@@ -85,4 +118,6 @@ export const {
     useVideoCutMutation,
     useTranslateVideoMutation,
     useMakeSubsMutation,
+    useUploadAudioMutation,
+    useTranslateAudioMutation,
 } = videoApi;

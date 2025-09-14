@@ -1,8 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import VideoPlayer from "./VideoPlayer";
-import { Listbox } from "@headlessui/react";
 import { useTranslateVideoMutation, useVideoCutMutation } from "../Redux/api/videoApi.ts";
+import { useSelector } from "react-redux"; // 👈 Импортируем useSelector
+
+// Импортируем файлы переводов
+import ru from '../translations/ru.json';
+import tat from '../translations/tat.json';
+import Dropdown from "./Dropdown.tsx";
+
+const translations = { ru, tat };
 
 // Удален начальный массив subtitles, так как он будет приходить с бэкенда
 const subtitles = [];
@@ -26,12 +33,19 @@ export default function EditPage() {
     const speakers = ["almaz", "alsu"];
     const [speaker, setSpeaker] = useState(speakers[0]);
 
-    const languages = ["Русский", "Татарский", "Английский"];
+    const languages = [translations.ru.languages.russian, translations.ru.languages.tatar, translations.ru.languages.english];
     const [sourceLang, setSourceLang] = useState(languages[0]);
     const [targetLang, setTargetLang] = useState(languages[1]);
 
     const [subs, setSubs] = useState(subtitles);
     const [currentSub, setCurrentSub] = useState<null | { start: number; end: number; text: Record<string,string>; lang?: string }>(null);
+
+    // Получаем текущий язык из Redux
+    const currentLanguage = useSelector(state => state.language.current);
+    const t = (key) => translations[currentLanguage][key];
+
+    // Обновляем список языков и их отображение в зависимости от выбранного языка
+    const translatedLanguages = [t('languages.russian'), t('languages.tatar'), t('languages.english')];
 
     const handleTranslateAndGoExport = async () => {
         const videoUrl = localStorage.getItem("originalVideo");
@@ -72,7 +86,7 @@ export default function EditPage() {
 
             const formattedSubs = response.subtitlesList.map(sub => {
                 const textObject = {
-                    "rus_Lath": sub.text, // Использование text_rus из ответа
+                    "rus_Lath": sub.text,
                     "tat_Cyrl": sub.text_tat
                 };
 
@@ -93,6 +107,7 @@ export default function EditPage() {
 
     const handleGoToExportPage = () => {
         if (currentVideoUrl) {
+            localStorage.setItem("subtitlesData", JSON.stringify(subs));
             localStorage.setItem("currentVideo", currentVideoUrl);
             navigate("/exportTranslate");
         } else {
@@ -101,7 +116,7 @@ export default function EditPage() {
     };
 
     const handleTrimVideo = async () => {
-        const videoUrl = localStorage.getItem("originalVideo");
+        const videoUrl = localStorage.getItem("currentVideo");
         if (!videoUrl) {
             console.error("URL видео не найден в localStorage.");
             return;
@@ -136,9 +151,41 @@ export default function EditPage() {
     const targetCode = langLabelToCode(targetLang);
 
     return (
-        <div className="min-h-screen flex flex-col items-center bg-gray-50">
-            <div className="w-full max-w-6xl px-6 py-4">
-                <button onClick={() => navigate("/")} className="text-blue-600">← Назад</button>
+        <div className="min-h-screen flex flex-col items-center bg-gray-50 mt-5">
+            <div className="w-full max-w-6xl px-6 py-4 flex justify-between items-center">
+                <button
+                    onClick={() => navigate("/")}
+                    className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span>{t('back')}</span>
+                </button>
+                <button
+                    onClick={handleGoToExportPage}
+                    disabled={!currentVideoUrl}
+                    className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <span>{t('export')}</span>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </button>
             </div>
 
             <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl px-6">
@@ -147,7 +194,10 @@ export default function EditPage() {
                         videoUrl={currentVideoUrl}
                         trimStart={trimStart}
                         trimEnd={trimEnd}
-                        onTrimChange={(s, e) => { setTrimStart(s); setTrimEnd(e); }}
+                        onTrimChange={(s, e) => {
+                            setTrimStart(s);
+                            setTrimEnd(e);
+                        }}
                         onTimeUpdate={(time) => {
                             const found = subs.find(s => time >= s.start && time <= s.end);
                             if (found) {
@@ -160,8 +210,9 @@ export default function EditPage() {
 
                     <div className="w-4/4 mt-4 h-50">
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-black/70 text-white px-4 py-3 rounded-lg text-sm shadow min-h-[56px]">
-                                <div className="text-xs text-gray-300 mb-1">{sourceLang}</div>
+                            <div className="bg-white text-black px-4 py-3 rounded-lg text-sm shadow min-h-[56px]">
+                                <div className="text-xl text-black mb-1">{t('lang_from')}</div>
+                                <div className="border-t border-gray-400 my-2"></div>
                                 <div>
                                     {currentSub
                                         ? (currentSub.text[langLabelToCode(sourceLang)] ||
@@ -173,11 +224,12 @@ export default function EditPage() {
                                 </div>
                             </div>
 
-                            <div className="bg-black/70 text-green-200 px-4 py-3 rounded-lg text-sm shadow min-h-[56px]">
-                                <div className="text-xs text-gray-300 mb-1">{targetLang}</div>
+                            <div className="bg-white text-black px-4 py-3 rounded-lg text-sm shadow min-h-[56px]">
+                                <div className="text-xl text-black mb-1">{t('lang_to')}</div>
+                                <div className="border-t border-gray-400 my-2"></div>
                                 {currentSub ? (
                                     <textarea
-                                        className="w-full h-40 bg-transparent resize-none focus:outline-none text-green-200"
+                                        className="w-full h-40 bg-transparent resize-none focus:outline-none text-black"
                                         rows={2}
                                         value={currentSub.text[targetCode] || ""}
                                         onChange={(e) => {
@@ -185,12 +237,12 @@ export default function EditPage() {
                                             setSubs(prev =>
                                                 prev.map(s =>
                                                     s.start === currentSub.start && s.end === currentSub.end
-                                                        ? { ...s, text: { ...s.text, [targetCode]: newText } }
+                                                        ? {...s, text: {...s.text, [targetCode]: newText}}
                                                         : s
                                                 )
                                             );
                                             setCurrentSub(cs =>
-                                                cs ? { ...cs, text: { ...cs.text, [targetCode]: newText } } : cs
+                                                cs ? {...cs, text: {...cs.text, [targetCode]: newText}} : cs
                                             );
                                         }}
                                     />
@@ -202,56 +254,54 @@ export default function EditPage() {
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-4 w-full md:w-72">
-                    <button
-                        className="px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
-                        onClick={handleTrimVideo}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? "Обрезаем..." : "Обрезать"}
-                    </button>
+                <div className="flex flex-col gap-4 w-full md:w-72 relative">
                     <button
                         className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
                         onClick={handleTranslateAndGoExport}
                         disabled={isTranslating}
                     >
-                        {isTranslating ? "Переводим..." : "Перевести видео"}
+                        {isTranslating ? t('translating_video_btn') : t('translate_video_btn')}
                     </button>
-
-                    {/* Кнопка "Экспорт" будет доступна только после успешного перевода */}
                     <button
-                        className="px-6 py-3 rounded-lg bg-gray-400 text-white font-semibold shadow"
-                        onClick={handleGoToExportPage}
-                        disabled={!currentVideoUrl} // Отключаем, если URL не готов
+                        className="px-6 py-3 rounded-lg bg-green-500 text-white font-semibold shadow hover:shadow-lg hover:brightness-105"
+                        onClick={handleTrimVideo}
+                        disabled={isLoading}
                     >
-                        Перейти к экспорту
+                        {isLoading ? t('trimming_video_btn') : t('trim_video_btn')}
                     </button>
 
-                    {isSuccess && <div className="text-green-600 mt-2">✅ Видео успешно обрезано!</div>}
-                    {isError && <div className="text-red-600 mt-2">❌ Ошибка: {JSON.stringify(error)}</div>}
 
-                    {isTranslateSuccess && <div className="text-green-600 mt-2">✅ Видео успешно переведено!</div>}
-                    {isTranslateError && <div className="text-red-600 mt-2">❌ Ошибка перевода: {JSON.stringify(translateError)}</div>}
+                    {isSuccess && <div className="text-green-600 mt-2">{t('video_trimmed_success')}</div>}
+                    {isError && <div className="text-red-600 mt-2">{t('trim_error')} {JSON.stringify(error)}</div>}
+
+                    {isTranslateSuccess && <div className="text-green-600 mt-2">{t('video_translated_success')}</div>}
+                    {isTranslateError &&
+                        <div className="text-red-600 mt-2">{t('translate_error')} {JSON.stringify(translateError)}</div>}
 
                     <div className="border-t border-gray-200 my-2"/>
 
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm text-gray-700">Громкость аудио ({audioVolume.toFixed(1)})</label>
-                        <input type="range" min={0} max={1} step={0.1} value={audioVolume}
-                               onChange={(e) => setAudioVolume(Number(e.target.value))}
-                               className="w-full accent-green-500"/>
+                        <div className="flex justify-between items-center">
+                            <label className="text-sm text-gray-700">{t('video_volume')}</label>
+                            <span className="text-sm text-gray-700">{Math.round(audioVolume * 100)}%</span>
+                        </div>
+                        <input type="range" min={0} max={100} step={1} value={audioVolume * 100}
+                               onChange={(e) => setAudioVolume(Number(e.target.value) / 100)}
+                               className="w-full accent-green-500 rounded-lg h-2 shadow-md focus:outline-green-500"/>
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm text-gray-700">Громкость дубляжа
-                            ({tatarianVolume.toFixed(1)})</label>
-                        <input type="range" min={0} max={1} step={0.1} value={tatarianVolume}
-                               onChange={(e) => setTatarianVolume(Number(e.target.value))}
-                               className="w-full accent-green-500"/>
+                        <div className="flex justify-between items-center">
+                            <label className="text-sm text-gray-700">{t('dubbing_volume')}</label>
+                            <span className="text-sm text-gray-700">{Math.round(tatarianVolume * 100)}%</span>
+                        </div>
+                        <input type="range" min={0} max={100} step={1} value={tatarianVolume * 100}
+                               onChange={(e) => setTatarianVolume(Number(e.target.value) / 100)}
+                               className="w-full accent-green-500 rounded-lg h-2 shadow-md focus:outline-green-500"/>
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm text-gray-700">Спикеры</label>
+                        <label className="text-sm text-gray-700">{t('speakers')}</label>
                         <div className="flex gap-2">
                             {["Алмаз", "Алсу"].map((spLabel, index) => (
                                 <button
@@ -269,45 +319,10 @@ export default function EditPage() {
                         </div>
                     </div>
 
-                    <Dropdown label="С какого языка" options={languages} value={sourceLang} onChange={setSourceLang}/>
-                    <Dropdown label="На какой язык" options={languages} value={targetLang} onChange={setTargetLang}/>
+                    <Dropdown label={t('from_language')} options={translatedLanguages} value={sourceLang} onChange={setSourceLang}/>
+                    <Dropdown label={t('to_language')} options={translatedLanguages} value={targetLang} onChange={setTargetLang}/>
                 </div>
             </div>
-        </div>
-    );
-}
-
-
-function Dropdown({label, options, value, onChange}: {
-    label: string;
-    options: string[];
-    value: string;
-    onChange: (val: string) => void
-}) {
-    return (
-        <div className="flex flex-col gap-2">
-            <label className="text-sm text-gray-700">{label}</label>
-            <Listbox value={value} onChange={onChange}>
-                <div className="relative">
-                    <Listbox.Button
-                        className="w-full p-2 border-2 border-green-500 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400">
-                        {value}
-                    </Listbox.Button>
-                    <Listbox.Options className="absolute mt-1 w-full rounded-md bg-white shadow-lg border border-green-400 z-10">
-                        {options.map((option) => (
-                            <Listbox.Option
-                                key={option}
-                                value={option}
-                                className={({ active, selected }) =>
-                                    `cursor-pointer select-none p-2 ${active ? "bg-green-100 text-green-700" : selected ? "bg-green-50 text-green-600" : "text-gray-700"}`
-                                }
-                            >
-                                {option}
-                            </Listbox.Option>
-                        ))}
-                    </Listbox.Options>
-                </div>
-            </Listbox>
         </div>
     );
 }

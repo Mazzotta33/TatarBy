@@ -1,49 +1,52 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { setLanguage } from '../Redux/store/languageSlice';
+
+// Import your JSON translation files
+import ru from '../translations/ru.json';
+import tat from '../translations/tat.json';
+
+const translations = { ru, tat };
 
 const Navbar = () => {
-    const location = useLocation();
+    const dispatch = useDispatch();
+    const currentLanguage = useSelector(state => state.language.current);
 
-    // Функция для определения активного пути
-    const isActiveLink = (path: string) => {
-        if (path === '/') {
-            return location.pathname === '/';
-        }
-        return location.pathname.startsWith(path);
-    };
+    // Helper function to get translated text
+    const t = (key) => translations[currentLanguage][key];
 
     return (
-        <div>
-            <div className="flex items-center justify-center bg-white shadow py-4">
-                <h1 className="text-3xl font-bold text-green-600 flex items-center">
-                    TatTranslate
-                    <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Flag_of_Tatarstan.svg/640px-Flag_of_Tatarstan.svg.png"
-                        alt="Флаг Татарстана"
-                        className="w-8 h-6 rounded-sm shadow-md ml-2"
-                    />
-                </h1>
+        <nav className="bg-white p-4 mt-8 rounded-3xl shadow-md flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+                <div className="text-4xl font-bold text-gray-800 flex items-center">
+                    <img src="./../../public/Logo.png" alt="logo" className="mr-4 w-72 h-15 mt-3" />
+                </div>
             </div>
-            <nav className="flex items-center justify-center p-4 bg-white shadow-sm">
-                <NavLink
-                    to="/"
-                    className={isActiveLink('/') ? 'p-5 mx-4 border-b-2 border-green-500 text-green-500 font-semibold transition-colors duration-200' : 'p-5 mx-4 border-b-2 border-transparent text-gray-500 hover:text-green-500 transition-colors duration-200'}
-                >
-                    Загрузка
-                </NavLink>
-                <NavLink
-                    to="/edit"
-                    className={isActiveLink('/edit') ? 'p-5 mx-4 border-b-2 border-green-500 text-green-500 font-semibold transition-colors duration-200' : 'p-5 mx-4 border-b-2 border-transparent text-gray-500 hover:text-green-500 transition-colors duration-200'}
-                >
-                    Редактирование
-                </NavLink>
-                <NavLink
-                    to="/export"
-                    className={isActiveLink('/export') ? 'p-5 mx-4 border-b-2 border-green-500 text-green-500 font-semibold transition-colors duration-200' : 'p-5 mx-4 border-b-2 border-transparent text-gray-500 hover:text-green-500 transition-colors duration-200'}
-                >
-                    Экспорт
-                </NavLink>
-            </nav>
-        </div>
+
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <span className="hidden md:inline p-4 text-black md:text-lg">
+                    {t('site_language')}
+                </span>
+                <div className="flex items-center space-x-1 p-1 bg-gray-100 rounded-full border border-gray-200">
+                    <button
+                        onClick={() => dispatch(setLanguage('ru'))}
+                        className={`px-4 py-2 rounded-full font-semibold ${
+                            currentLanguage === 'ru' ? 'bg-green-500 text-white' : 'text-gray-500'
+                        }`}
+                    >
+                        {t('rus')}
+                    </button>
+                    <button
+                        onClick={() => dispatch(setLanguage('tat'))}
+                        className={`px-4 py-2 rounded-full font-semibold ${
+                            currentLanguage === 'tat' ? 'bg-green-500 text-white' : 'text-gray-500'
+                        }`}
+                    >
+                        {t('tat')}
+                    </button>
+                </div>
+            </div>
+        </nav>
     );
 };
 

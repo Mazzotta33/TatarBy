@@ -1,4 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import {useSelector} from "react-redux";
+
+import ru from '../translations/ru.json';
+import tat from '../translations/tat.json';
+
+const translations = { ru, tat };
 
 interface TrimTimelineProps {
     duration: number;
@@ -15,6 +21,9 @@ const TrimTimeLine = ({ duration, trimStart, trimEnd, onTrimChange }: TrimTimeli
     const [isDraggingEnd, setIsDraggingEnd] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(1);
     const [scrollOffset, setScrollOffset] = useState(0);
+
+    const currentLanguage = useSelector(state => state.language.current);
+    const t = (key) => translations[currentLanguage][key];
 
     useEffect(() => {
         setLocalStart(trimStart);
@@ -93,7 +102,7 @@ const TrimTimeLine = ({ duration, trimStart, trimEnd, onTrimChange }: TrimTimeli
         <div className="w-full h-70 bg-white rounded-lg p-4 mt-4 shadow-sm">
             <div className="flex justify-between items-center mb-2">
                 <h3 className="text-sm font-semibold text-gray-700">
-                    Временная шкала
+                    {t('timeBar')}
                 </h3>
                 <div className="flex items-center gap-2 text-gray-500 text-xs">
                     <button onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.2))} className="p-1 hover:bg-gray-100 rounded">➖</button>

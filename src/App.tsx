@@ -6,6 +6,8 @@ import EditPage from "./Components/EditPage.tsx";
 import Layout from "./Components/Layout.tsx";
 import VideoWithSubtitles from "./Components/VideoWithSubtitles.tsx";
 import ExportFileSub from "./Components/ExportFileSub.tsx";
+import AudioPage from "./Components/AudioPage.tsx";
+import ExportAudio from "./Components/ExportAudio.tsx";
 
 function App() {
 
@@ -16,8 +18,10 @@ function App() {
                   <Route index element={<UploadFile/>} />
                   <Route path="/edit" element={<EditPage/>} />
                   <Route path="/editSub" element={<VideoWithSubtitles/>} />
+                  <Route path="/editAudio" element={<AudioPage/>} />
                   <Route path="/exportTranslate" element={<ExportFileTranslate/>} />
                   <Route path="/exportSub" element={<ExportFileSub/>} />
+                  <Route path="/exportAudio" element={<ExportAudio/>} />
               </Route>
           </Routes>
       </div>

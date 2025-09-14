@@ -1,25 +1,15 @@
 import { useNavigate } from "react-router-dom";
+import {useState, useEffect} from "react";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
+import { useSelector } from "react-redux"; // 👈 Импортируем useSelector
 
-// 🔽 твои субтитры
-const subtitles = [
-    { start: 27.2, end: 33.42, lang: "ru", text: { ru: "Мы рады приветствовать гостей и участников восьмого Международного Золотардынского форума.", tt: "Сигезенче Халыкара Алтын Урда форумында катнашучыларны һәм кунакларны каршы алуыбызга шатбыз.", ar: "" } },
-    { start: 33.42, end: 43.0, lang: "ru", text: { ru: "Они вносят существенный вклад в изучение истории как татарского народа, так и народов Республики Татарстан и в целом истории России.", tt: "Алар татар халкының, Татарстан Республикасы халыкларының һәм гомумән, Россия тарихының тарихын өйрәнүгә зур өлеш кертә.", ar: "" } },
-    { start: 46.7, end: 57.5, lang: "ru", text: { ru: "Лусджучи или Золотая Орда является неотлеваемой частью российского культурного пространства и является частью общероссийского прошлого.", tt: "Лусджучи, ягъни Алтын Урда, Россия мәдәниятенең аерылгысыз өлеше булып тора һәм гомумроссия үткәненең өлеше булып тора.", ar: "" } },
-    { start: 59.7, end: 64.18, lang: "ar", text: { ar: "في الواقع أنا مسرور جداً للمشاركة في هذا المؤتمر الدولي", ru: "", tt: "" } },
-    { start: 64.18, end: 73.0, lang: "ar", text: { ar: "ولقد حسني الشرف بأن أكون من الشخصيات التي شدت الرحال من أقصى الغرب الإسلامي إلى أسير وسطة وبالضبط إلى قزان", ru: "", tt: "" } },
-    { start: 74.0, end: 87.3, lang: "ru", text: { ru: "Для меня, во-первых, произвело серьезное впечатление количество участников, среди них достаточно большой состав известных людей, историков. Когда у человека есть сильные корни, он всегда в этой жизни будет уверенно стоять на своих ногах.", tt: "Минем өчен, беренчедән, катнашучыларның саны, шул исәптән билгеле кешеләр, тарихчылар саны да шактый зур иде, чөнки кешенең тамырлары нык булгач, ул бу тормышта һәрвакыт үз аякларында ышаныч белән торачак.", ar: "" } },
-    { start: 95.0, end: 98.4, lang: "ru", text: { ru: "В истории не бывает однозначно хорошего или плохого явления.", tt: "Тарихта бернинди дә яхшы яки начар күренешләр юк.", ar: "" } },
-    { start: 99.4, end: 105.0, lang: "ru", text: { ru: "Мы из любого явления должны извлекать уроки для того, чтобы идти дальше.", tt: "Алга таба барыр өчен, без һәркайсы күренештән сабак алырга тиеш.", ar: "" } },
-    { start: 114.0, end: 129.2, lang: "ru", text: { ru: "Золото-Арденский форум – это мероприятие, которое имеет уже в международном масштабе хороший отклик, хорошо известное и, наверное, одно из главных научных мероприятий по тематике истории средних веков евразийского пространства.", tt: "Алтын-Ардэн форумы - халыкара дәрәҗәдә яхшы кабул ителгән, яхшы билгеле һәм, бәлки, Евразия киңлегенең урта гасырлар тарихы темасына багышланган төп фәнни чараларның берсе.", ar: "" } },
-    { start: 133.6, end: 139.04, lang: "ru", text: { ru: "Золотая Орда и Лос-Джучи – это те основы, на которых", tt: "Алтын Урда һәм Лос-Джучи - бу нигезләр.", ar: "" } },
-    { start: 139.04, end: 141.4, lang: "ru", text: { ru: "построена государственность многих наших стран.", tt: "Күп кенә илләребезнең дәүләтчелеге төзелгән.", ar: "" } },
-    { start: 162.5, end: 167.84, lang: "ru", text: { ru: "Международный Золотардынский форум – это уже такой бренд для всех специалистов,", tt: "Халыкара Алтын Урда форумы инде барлык белгечләр өчен шундый бренд.", ar: "" } },
-    { start: 168.04, end: 171.66, lang: "ru", text: { ru: "кто занимается золотардынским периодом, периодом татарских ханцев,", tt: "Алтын чоры, татар ханнары чоры,", ar: "" } },
-    { start: 171.78, end: 174.5, lang: "ru", text: { ru: "для тех, кто занимается средними веками.", tt: "урта гасырлар белән шөгыльләнүчеләр өчен.", ar: "" } },
-    { start: 176.4, end: 184.0, lang: "ru", text: { ru: "И мы, конечно, как организаторы, всегда готовы принять наших уважаемых коллег в Казани, в Булгарии, в Татарстане.", tt: "Һәм без, әлбәттә, оештыручылар буларак, Казанда, Болгариядә, Татарстанда хөрмәтле хезмәттәшләребезне кабул итәргә һәрвакыт әзер.", ar: "" } },
-];
+// Импортируем файлы переводов
+import ru from '../translations/ru.json';
+import tat from '../translations/tat.json';
+
+const translations = { ru, tat };
+
 
 const DownloadIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -31,13 +21,38 @@ const DownloadIcon = () => (
     </svg>
 );
 
+const ShareIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2">
+        <circle cx="18" cy="5" r="3"></circle>
+        <circle cx="6" cy="12" r="3"></circle>
+        <circle cx="18" cy="19" r="3"></circle>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+    </svg>
+);
+
 const ExportFileSub = () => {
     const navigate = useNavigate();
+    const [alertMessage, setAlertMessage] = useState("");
+    const [subtitles, setSubtitles] = useState([]);
+
+    const videoUrl = localStorage.getItem("currentVideo");
+
+    // Получаем текущий язык из Redux
+    const currentLanguage = useSelector(state => state.language.current);
+    const t = (key) => translations[currentLanguage][key];
+
+    useEffect(() => {
+        const subtitlesDataString = localStorage.getItem("subtitlesData");
+        if (subtitlesDataString) {
+            setSubtitles(JSON.parse(subtitlesDataString));
+        }
+    }, []);
 
     const handleExportVideo = () => {
-        const videoUrl = localStorage.getItem("currentVideo");
         if (!videoUrl) {
-            alert("Видео не найдено в localStorage");
+            setAlertMessage(t('video_not_found_alert'));
+            setTimeout(() => setAlertMessage(""), 3000);
             return;
         }
         const link = document.createElement("a");
@@ -49,13 +64,18 @@ const ExportFileSub = () => {
     };
 
     const handleDownloadSubtitles = async () => {
+        if (subtitles.length === 0) {
+            setAlertMessage(t('subs_not_found_alert'));
+            setTimeout(() => setAlertMessage(""), 3000);
+            return;
+        }
+
         const doc = new Document({
             sections: [
                 {
                     properties: {},
                     children: subtitles.map((sub, index) => {
                         const timeRange = `[${sub.start.toFixed(2)} - ${sub.end.toFixed(2)}]`;
-
                         const lines = [
                             new Paragraph({
                                 children: [
@@ -73,7 +93,6 @@ const ExportFileSub = () => {
                                 );
                             }
                         });
-
                         return lines;
                     }).flat(),
                 },
@@ -84,12 +103,38 @@ const ExportFileSub = () => {
         saveAs(blob, "subtitles.docx");
     };
 
+    const handleShare = () => {
+        if (videoUrl) {
+            navigator.clipboard.writeText(videoUrl).then(() => {
+                setAlertMessage(t('link_copied_alert'));
+                setTimeout(() => setAlertMessage(""), 3000);
+            }).catch(err => {
+                console.error("Не удалось скопировать ссылку:", err);
+                setAlertMessage(t('copy_error_alert'));
+                setTimeout(() => setAlertMessage(""), 3000);
+            });
+        }
+    };
+
     return (
-        <div className="h-full flex flex-col items-center bg-gray-50">
+        <div className="h-full flex flex-col items-center bg-gray-50 mt-5">
             <div className="w-full max-w-6xl mb-8">
-                <div className="w-full max-w-6xl px-6 py-4">
-                    <button onClick={() => navigate("/edit")} className="text-blue-600">← Назад</button>
-                </div>
+                <button
+                    onClick={() => navigate("/editSub")}
+                    className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span>{t('back')}</span>
+                </button>
 
                 <div className="flex flex-row justify-center gap-10">
                     <div className="flex justify-center items-center gap-4 mt-30 mb-20">
@@ -98,7 +143,7 @@ const ExportFileSub = () => {
                             className="flex items-center px-10 py-5 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold text-lg shadow-lg hover:shadow-2xl hover:brightness-110 transition"
                         >
                             <DownloadIcon/>
-                            Скачать переведенное видео
+                            {t('download_video_btn')}
                         </button>
                     </div>
 
@@ -108,16 +153,33 @@ const ExportFileSub = () => {
                             className="flex items-center px-10 py-5 rounded-2xl bg-white text-green-500 font-bold text-lg shadow-lg hover:shadow-2xl hover:bg-gray-100 transition"
                         >
                             <DownloadIcon/>
-                            Скачать субтитры в .docx
+                            {t('download_subs_btn')}
                         </button>
                     </div>
+                </div>
+
+                <div className="flex justify-center items-center">
+                    <button
+                        onClick={handleShare}
+                        className="p-4 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200"
+                        aria-label={t('share_btn')}
+                    >
+                        <ShareIcon/>
+                    </button>
                 </div>
             </div>
 
             <div
                 className="w-full max-w-4xl p-12 border-2 border-dashed border-gray-300 rounded-xl text-center text-gray-500 text-lg">
-                Место для вашей рекламы
+                {t('ad_placeholder')}
             </div>
+
+            {alertMessage && (
+                <div
+                    className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-3 rounded-lg shadow-xl z-50">
+                    {alertMessage}
+                </div>
+            )}
         </div>
     );
 };
