@@ -1,18 +1,17 @@
-/* Базовый стиль option */
+
 select option {
-    background-color: #ffffff; /* фон списка */
-    color: #111827;           /* текст */
+    background-color: #ffffff;
+    color: #111827;
 }
 
-/* При наведении */
+
 select option:hover {
-    background-color: #d1fae5; /* светло-зелёный */
+    background-color: #d1fae5;
 }
 
-/* Выбранный элемент */
 select option:checked {
-    background-color: #10b981; /* основной зелёный */
-    color: #ffffff;           /* белый текст */
+    background-color: #10b981;
+    color: #ffffff;
 }
 
 

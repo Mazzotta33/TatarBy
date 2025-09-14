@@ -19,7 +19,6 @@ const UploadFile = () => {
 
     const [activeCard, setActiveCard] = useState<string | null>('subtitles');
 
-    // Получаем текущий язык из Redux
     const currentLanguage = useSelector(state => state.language.current);
     const t = (key) => translations[currentLanguage][key];
 
@@ -37,7 +36,6 @@ const UploadFile = () => {
                 localStorage.setItem("currentVideo", videoUrl);
 
             } else if (e.target === fileInputRefAudio.current) {
-                // Если это аудио
                 res = await uploadAudio(file).unwrap();
                 const audioUrl = typeof res === "string" ? res : res.audioUrl;
                 localStorage.setItem("originalAudio", audioUrl);

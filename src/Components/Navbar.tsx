@@ -2,7 +2,6 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLanguage } from '../Redux/store/languageSlice';
 
-// Import your JSON translation files
 import ru from '../translations/ru.json';
 import tat from '../translations/tat.json';
 
@@ -12,7 +11,6 @@ const Navbar = () => {
     const dispatch = useDispatch();
     const currentLanguage = useSelector(state => state.language.current);
 
-    // Helper function to get translated text
     const t = (key) => translations[currentLanguage][key];
 
     return (

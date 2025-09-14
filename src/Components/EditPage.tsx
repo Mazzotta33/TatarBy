@@ -2,16 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import VideoPlayer from "./VideoPlayer";
 import { useTranslateVideoMutation, useVideoCutMutation } from "../Redux/api/videoApi.ts";
-import { useSelector } from "react-redux"; // 👈 Импортируем useSelector
+import { useSelector } from "react-redux";
 
-// Импортируем файлы переводов
 import ru from '../translations/ru.json';
 import tat from '../translations/tat.json';
 import Dropdown from "./Dropdown.tsx";
 
 const translations = { ru, tat };
 
-// Удален начальный массив subtitles, так как он будет приходить с бэкенда
 const subtitles = [];
 
 export default function EditPage() {
@@ -40,11 +38,9 @@ export default function EditPage() {
     const [subs, setSubs] = useState(subtitles);
     const [currentSub, setCurrentSub] = useState<null | { start: number; end: number; text: Record<string,string>; lang?: string }>(null);
 
-    // Получаем текущий язык из Redux
     const currentLanguage = useSelector(state => state.language.current);
     const t = (key) => translations[currentLanguage][key];
 
-    // Обновляем список языков и их отображение в зависимости от выбранного языка
     const translatedLanguages = [t('languages.russian'), t('languages.tatar'), t('languages.english')];
 
     const handleTranslateAndGoExport = async () => {
@@ -123,13 +119,13 @@ export default function EditPage() {
         }
 
         try {
-            const response  = await videoCut({ // Здесь 'response' переименован в 'videoUrl'
+            const response  = await videoCut({
                 videoUrl,
                 startSeconds: trimStart,
                 endSeconds: trimEnd,
             }).unwrap();
 
-            setCurrentVideoUrl(response.videoUrl); // Теперь используем саму строку, без .videoUrl
+            setCurrentVideoUrl(response.videoUrl);
             localStorage.setItem("currentVideo", response.videoUrl);
             localStorage.setItem("originalVideo", response.videoUrl);
 

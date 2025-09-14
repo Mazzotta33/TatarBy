@@ -1,5 +1,3 @@
-// src/Redux/api/videoApi.ts
-
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 interface Subtitle {
@@ -28,7 +26,6 @@ interface TranslateAudioRequestBody {
     subtitlesList: Subtitle[] | null;
 }
 
-// 👈 Новый интерфейс для ответа на перевод аудио
 interface TranslateAudioResponse {
     audioUrl: string;
     params: TranslateParams;
@@ -46,7 +43,6 @@ interface MakeSubsRequestBody {
     subtitlesList: Subtitle[] | null;
 }
 
-// Интерфейс для ответа бэкенда на создание субтитров
 interface MakeSubsResponse {
     videoUrl: string;
     subtitlesList: Subtitle[];
@@ -59,10 +55,10 @@ export const videoApi = createApi({
         uploadVideo: builder.mutation<string, File>({
             query: (file) => {
                 const formData = new FormData();
-                formData.append("file", file); // ключ как в Swagger
+                formData.append("file", file);
 
                 return {
-                    url: "/video/upload", // как в картинке
+                    url: "/video/upload",
                     method: "POST",
                     body: formData,
                     responseHandler: (response) => response.text()
@@ -72,10 +68,10 @@ export const videoApi = createApi({
         uploadAudio: builder.mutation<string, File>({
             query: (file) => {
                 const formData = new FormData();
-                formData.append("file", file); // ключ как в Swagger
+                formData.append("file", file);
 
                 return {
-                    url: "/audio/upload", // Указываем URL для аудио
+                    url: "/audio/upload",
                     method: "POST",
                     body: formData,
                     responseHandler: (response) => response.text()

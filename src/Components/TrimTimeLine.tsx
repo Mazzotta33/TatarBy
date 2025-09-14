@@ -47,12 +47,10 @@ const TrimTimeLine = ({ duration, trimStart, trimEnd, onTrimChange }: TrimTimeli
 
     const ticks = generateTicks(duration, 5);
 
-    // Обработчики перетаскивания маркеров
     const handleMouseMove = useCallback((e: MouseEvent) => {
         if (!timelineRef.current) return;
         const rect = timelineRef.current.getBoundingClientRect();
 
-        // Рассчитываем новую позицию в секундах
         const totalTimelineWidth = duration * 20 * zoomLevel;
         let newTimeInPixels = e.clientX - rect.left + timelineRef.current.scrollLeft;
         let newTime = (newTimeInPixels / totalTimelineWidth) * duration;
@@ -107,7 +105,7 @@ const TrimTimeLine = ({ duration, trimStart, trimEnd, onTrimChange }: TrimTimeli
                 <div className="flex items-center gap-2 text-gray-500 text-xs">
                     <button onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.2))} className="p-1 hover:bg-gray-100 rounded">➖</button>
                     <button onClick={() => setZoomLevel(prev => Math.min(5, prev + 0.2))} className="p-1 hover:bg-gray-100 rounded">➕</button>
-                    <span>{formatTime(0)} - {formatTime(duration)}</span> {/* TODO: это должно меняться при зуме */}
+                    <span>{formatTime(0)} - {formatTime(duration)}</span>
                 </div>
             </div>
 

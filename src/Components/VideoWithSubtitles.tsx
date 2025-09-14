@@ -2,9 +2,8 @@ import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 import VideoPlayer from "./VideoPlayer.tsx";
 import {useMakeSubsMutation, useVideoCutMutation} from "../Redux/api/videoApi.ts";
-import { useSelector } from "react-redux"; // 👈 Импортируем useSelector
+import { useSelector } from "react-redux";
 
-// Импортируем файлы переводов
 import ru from '../translations/ru.json';
 import tat from '../translations/tat.json';
 
@@ -38,7 +37,6 @@ const VideoWithSubtitles = () => {
     const [subs, setSubs] = useState(subtitles);
     const [currentSub, setCurrentSub] = useState<null | { start: number; end: number; text: Record<string,string>; lang?: string }>(null);
 
-    // Получаем текущий язык из Redux
     const currentLanguage = useSelector(state => state.language.current);
     const t = (key) => translations[currentLanguage][key];
 
@@ -61,13 +59,13 @@ const VideoWithSubtitles = () => {
         }
 
         try {
-            const response  = await videoCut({ // Здесь 'response' переименован в 'videoUrl'
+            const response  = await videoCut({
                 videoUrl,
                 startSeconds: trimStart,
                 endSeconds: trimEnd,
             }).unwrap();
 
-            setCurrentVideoUrl(response.videoUrl); // Теперь используем саму строку, без .videoUrl
+            setCurrentVideoUrl(response.videoUrl);
             localStorage.setItem("currentVideo", response.videoUrl);
             localStorage.setItem("originalVideo", response.videoUrl);
 
@@ -104,10 +102,9 @@ const VideoWithSubtitles = () => {
             setCurrentVideoUrl(response.videoUrl);
             localStorage.setItem("currentVideo", response);
 
-            // Преобразуем полученные субтитры обратно в формат для фронтенда
             const formattedSubs = response.subtitlesList.map(sub => {
                 const textObject = {
-                    "rus_Lath": sub.text, // Использование text_rus из ответа
+                    "rus_Lath": sub.text,
                     "tat_Cyrl": sub.text_tat
                 };
 

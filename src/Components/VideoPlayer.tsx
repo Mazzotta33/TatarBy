@@ -14,8 +14,6 @@ const VideoPlayer = ({ videoUrl, trimStart, trimEnd, onTrimChange, onTimeUpdate 
     const navigate = useNavigate();
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
-    //
-    // const [videoUrl] = useState<string | null>(localStorage.getItem("currentVideo"));
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -37,13 +35,6 @@ const VideoPlayer = ({ videoUrl, trimStart, trimEnd, onTrimChange, onTimeUpdate 
             setCurrentTime(0);
         }
     }, [videoUrl]);
-
-    // useEffect(() => {
-    //     if (!videoUrl) {
-    //         navigate("/");
-    //         return;
-    //     }
-    // }, [videoUrl, navigate]);
 
     useEffect(() => {
         const v = videoRef.current;

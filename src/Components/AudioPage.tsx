@@ -3,7 +3,6 @@ import { useState } from "react";
 import {useMakeSubsMutation, useTranslateAudioMutation} from "../Redux/api/videoApi.ts";
 import { useSelector } from "react-redux";
 
-// Импортируем файлы переводов
 import ru from '../translations/ru.json';
 import tat from '../translations/tat.json';
 import Dropdown from "./Dropdown.tsx";

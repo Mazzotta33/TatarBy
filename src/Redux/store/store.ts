@@ -1,4 +1,3 @@
-// src/Redux/store/store.ts
 import { configureStore } from '@reduxjs/toolkit';
 import {videoApi} from "../api/videoApi.ts";
 import languageSlice from "./languageSlice.ts";

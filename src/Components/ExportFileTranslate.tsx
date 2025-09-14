@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import {useEffect, useState} from "react";
-import { useSelector } from "react-redux"; // 👈 Импортируем useSelector
+import { useSelector } from "react-redux";
 import { saveAs } from "file-saver";
 
-// Импортируем файлы переводов
 import ru from '../translations/ru.json';
 import tat from '../translations/tat.json';
 import {Document, Packer, Paragraph, TextRun} from "docx";
@@ -26,7 +25,6 @@ const ExportFileTranslate = () => {
 
     const [subtitles, setSubtitles] = useState([]);
 
-    // Получаем текущий язык из Redux и создаем функцию-переводчик
     const currentLanguage = useSelector(state => state.language.current);
     const t = (key) => translations[currentLanguage][key];
 
@@ -45,11 +43,9 @@ const ExportFileTranslate = () => {
             return;
         }
 
-        // создаём временную ссылку для скачивания
         const link = document.createElement("a");
         link.href = videoUrl;
 
-        // имя файла (можно задать любое)
         link.download = "video.mp4";
 
         document.body.appendChild(link);
@@ -103,11 +99,11 @@ const ExportFileTranslate = () => {
         if (videoUrl) {
             navigator.clipboard.writeText(videoUrl).then(() => {
                 setAlertMessage(t('link_copied_alert'));
-                setTimeout(() => setAlertMessage(""), 3000); // Уведомление исчезнет через 3 секунды
+                setTimeout(() => setAlertMessage(""), 3000);
             }).catch(err => {
                 console.error("Не удалось скопировать ссылку:", err);
                 setAlertMessage(t('copy_error_alert'));
-                setTimeout(() => setAlertMessage(""), 3000); // Уведомление исчезнет через 3 секунды
+                setTimeout(() => setAlertMessage(""), 3000);
             });
         }
     };
@@ -166,7 +162,6 @@ const ExportFileTranslate = () => {
                 {t('ad_placeholder')}
             </div>
 
-            {/* Всплывающее уведомление */}
             {alertMessage && (
                 <div
                     className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-3 rounded-lg shadow-xl z-50">

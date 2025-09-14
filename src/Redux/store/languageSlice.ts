@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    current: 'ru', // Устанавливаем язык по умолчанию
+    current: 'ru',
 };
 
 const languageSlice = createSlice({

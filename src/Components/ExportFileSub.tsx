@@ -2,9 +2,8 @@ import { useNavigate } from "react-router-dom";
 import {useState, useEffect} from "react";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
-import { useSelector } from "react-redux"; // 👈 Импортируем useSelector
+import { useSelector } from "react-redux";
 
-// Импортируем файлы переводов
 import ru from '../translations/ru.json';
 import tat from '../translations/tat.json';
 
@@ -38,7 +37,6 @@ const ExportFileSub = () => {
 
     const videoUrl = localStorage.getItem("currentVideo");
 
-    // Получаем текущий язык из Redux
     const currentLanguage = useSelector(state => state.language.current);
     const t = (key) => translations[currentLanguage][key];
 
