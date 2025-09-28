@@ -24,9 +24,6 @@ const VideoWithSubtitles = () => {
     const [trimStart, setTrimStart] = useState(0);
     const [trimEnd, setTrimEnd] = useState(0);
 
-    const [audioVolume, setAudioVolume] = useState(1);
-    const [tatarianVolume, setTatarianVolume] = useState(1);
-
     const speakers = ["Алмаз", "Алсу"];
     const [speaker, setSpeaker] = useState(speakers[0]);
 
@@ -52,33 +49,33 @@ const VideoWithSubtitles = () => {
     };
 
     const handleTrimVideo = async () => {
-        const videoUrl = localStorage.getItem("originalVideo");
-        if (!videoUrl) {
+        const video_url = localStorage.getItem("originalVideo");
+        if (!video_url) {
             console.error("URL видео не найден в localStorage.");
             return;
         }
 
         try {
             const response  = await videoCut({
-                videoUrl,
-                startSeconds: trimStart,
-                endSeconds: trimEnd,
+                video_url,
+                start: trimStart,
+                end: trimEnd,
             }).unwrap();
 
-            setCurrentVideoUrl(response.videoUrl);
-            localStorage.setItem("currentVideo", response.videoUrl);
-            localStorage.setItem("originalVideo", response.videoUrl);
+            setCurrentVideoUrl(response.filename);
+            localStorage.setItem("currentVideo", response.filename);
+            localStorage.setItem("originalVideo", response.filename);
 
             console.log("Видео успешно обрезано:", response);
-            console.log("Видео успешно обрезано:", response.videoUrl);
+            console.log("Видео успешно обрезано:", response.filename);
         } catch (err) {
             console.error("Ошибка при обрезке видео:", err);
         }
     };
 
     const handleMakeSubs = async () => {
-        const videoUrl = localStorage.getItem("originalVideo");
-        if (!videoUrl) {
+        const video_url = localStorage.getItem("originalVideo");
+        if (!video_url) {
             console.error("URL видео не найден в localStorage.");
             return;
         }
@@ -95,12 +92,12 @@ const VideoWithSubtitles = () => {
 
         try {
             const response = await makeSubs({
-                videoUrl,
-                subtitlesList: subsListForBackend,
+                video_url,
+                text: subsListForBackend,
             }).unwrap();
 
-            setCurrentVideoUrl(response.videoUrl);
-            localStorage.setItem("currentVideo", response);
+            setCurrentVideoUrl(response.filename);
+            localStorage.setItem("currentVideo", response.filename);
 
             const formattedSubs = response.subtitlesList.map(sub => {
                 const textObject = {

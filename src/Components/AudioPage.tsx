@@ -14,7 +14,6 @@ const subtitles = [];
 const AudioPage = () => {
     const navigate = useNavigate();
 
-
     const [translateAudio, { isLoading: isTranslating, isSuccess: isTranslateSuccess, isError: isTranslateError, error: translateError }] = useTranslateAudioMutation();
 
     const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(() => {

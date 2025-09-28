@@ -50,7 +50,7 @@ interface MakeSubsResponse {
 
 export const videoApi = createApi({
     reducerPath: 'videoApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8080/api' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
     endpoints: (builder) => ({
         uploadVideo: builder.mutation<string, File>({
             query: (file) => {
@@ -58,10 +58,9 @@ export const videoApi = createApi({
                 formData.append("file", file);
 
                 return {
-                    url: "/video/upload",
+                    url: "/upload",
                     method: "POST",
                     body: formData,
-                    responseHandler: (response) => response.text()
                 };
             },
         }),
@@ -78,30 +77,30 @@ export const videoApi = createApi({
                 };
             },
         }),
-        videoCut: builder.mutation<string, { videoUrl: string; startSeconds: number; endSeconds: number }>({
-            query: ({ videoUrl, startSeconds, endSeconds  }) => ({
-                url: "/video/cut",
+        videoCut: builder.mutation<string, { video_url: string; start: number; end: number }>({
+            query: ({ video_url, start, end  }) => ({
+                url: "/cut",
                 method: "POST",
-                body: { videoUrl, startSeconds, endSeconds },
+                body: { video_url, start, end},
             }),
         }),
         translateVideo: builder.mutation<TranslateResponse, TranslateRequestBody>({
             query: (body) => ({
-                url: "/video/translate",
+                url: "/translate",
                 method: "POST",
                 body,
             }),
         }),
         translateAudio: builder.mutation<TranslateAudioResponse, TranslateAudioRequestBody>({
             query: (body) => ({
-                url: "/audio/translate",
+                url: "/translate_audio",
                 method: "POST",
                 body,
             }),
         }),
         makeSubs: builder.mutation<MakeSubsResponse, MakeSubsRequestBody>({
             query: (body) => ({
-                url: "/video/make-subs",
+                url: "/make-subs",
                 method: "POST",
                 body,
             }),

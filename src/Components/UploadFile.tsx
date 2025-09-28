@@ -15,7 +15,7 @@ const UploadFile = () => {
     const fileInputRefAudio = useRef<HTMLInputElement | null>(null);
 
     const [uploadVideo, { isLoading, data, error }] = useUploadVideoMutation();
-    const [uploadAudio, { isLoading: isAudioLoading, data: audioData, error: audioError }] = useUploadAudioMutation();
+    const [uploadAudio] = useUploadAudioMutation();
 
     const [activeCard, setActiveCard] = useState<string | null>('subtitles');
 
@@ -30,16 +30,18 @@ const UploadFile = () => {
             let res;
 
             if (e.target === fileInputRef.current || e.target === fileInputRefSubtitles.current) {
-                res = await uploadVideo(file).unwrap();
-                const videoUrl = typeof res === "string" ? res : res.videoUrl;
+                const res = await uploadVideo(file).unwrap();
+                const videoUrl = res.url;
                 localStorage.setItem("originalVideo", videoUrl);
                 localStorage.setItem("currentVideo", videoUrl);
+                console.log("Video uploaded and URL stored:", videoUrl);
 
             } else if (e.target === fileInputRefAudio.current) {
                 res = await uploadAudio(file).unwrap();
-                const audioUrl = typeof res === "string" ? res : res.audioUrl;
+                const audioUrl = typeof res === "string" ? res : res.url;
                 localStorage.setItem("originalAudio", audioUrl);
                 localStorage.setItem("currentAudio", audioUrl);
+                console.log("Audio uploaded and URL stored:", audioUrl);
 
             } else {
                 return;
@@ -179,7 +181,7 @@ const UploadFile = () => {
                                 type="file"
                                 accept="video/*"
                                 ref={fileInputRefSubtitles}
-                                onChange={(e) => handleFileChange(e, "/editAudio")}
+                                onChange={(e) => handleFileChange(e, "/editSub")}
                                 className="hidden"
                             />
                             <button

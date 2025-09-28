@@ -44,8 +44,8 @@ export default function EditPage() {
     const translatedLanguages = [t('languages.russian'), t('languages.tatar'), t('languages.english')];
 
     const handleTranslateAndGoExport = async () => {
-        const videoUrl = localStorage.getItem("originalVideo");
-        if (!videoUrl) {
+        const video_url = localStorage.getItem("originalVideo");
+        if (!video_url) {
             console.error("URL видео не найден в localStorage.");
             return;
         }
@@ -62,7 +62,7 @@ export default function EditPage() {
 
         try {
             const response = await translateVideo({
-                videoUrl,
+                video_url,
                 params: {
                     audioVolume,
                     tatarAudioVolume: tatarianVolume,
@@ -70,17 +70,17 @@ export default function EditPage() {
                     translateFrom: langLabelToCode(sourceLang),
                     translateTo: langLabelToCode(targetLang),
                 },
-                subtitlesList: subsListForBackend,
+                text: subsListForBackend,
             }).unwrap();
 
-            setCurrentVideoUrl(response.videoUrl);
-            localStorage.setItem("currentVideo", response.videoUrl);
+            setCurrentVideoUrl(response.filename);
+            localStorage.setItem("currentVideo", response.filename);
 
-            console.log("Видео успешно обрезано:", response.videoUrl);
+            console.log("Видео успешно обрезано:", response.filename);
             console.log("Видео успешно обрезано:", response);
-            console.log("Данные субтитров, полученные от бэкенда:", response.subtitlesList);
+            console.log("Данные субтитров, полученные от бэкенда:", response.subtitles);
 
-            const formattedSubs = response.subtitlesList.map(sub => {
+            const formattedSubs = response.subtitles.map(sub => {
                 const textObject = {
                     "rus_Lath": sub.text,
                     "tat_Cyrl": sub.text_tat
@@ -112,25 +112,25 @@ export default function EditPage() {
     };
 
     const handleTrimVideo = async () => {
-        const videoUrl = localStorage.getItem("currentVideo");
-        if (!videoUrl) {
+        const video_url = localStorage.getItem("currentVideo");
+        if (!video_url) {
             console.error("URL видео не найден в localStorage.");
             return;
         }
 
         try {
             const response  = await videoCut({
-                videoUrl,
-                startSeconds: trimStart,
-                endSeconds: trimEnd,
+                video_url,
+                start: trimStart,
+                end: trimEnd,
             }).unwrap();
 
-            setCurrentVideoUrl(response.videoUrl);
-            localStorage.setItem("currentVideo", response.videoUrl);
-            localStorage.setItem("originalVideo", response.videoUrl);
+            setCurrentVideoUrl(response.filename);
+            localStorage.setItem("currentVideo", response.filename);
+            localStorage.setItem("originalVideo", response.filename);
 
             console.log("Видео успешно обрезано:", response);
-            console.log("Видео успешно обрезано:", response.videoUrl);
+            console.log("Видео успешно обрезано:", response.filename);
         } catch (err) {
             console.error("Ошибка при обрезке видео:", err);
         }
