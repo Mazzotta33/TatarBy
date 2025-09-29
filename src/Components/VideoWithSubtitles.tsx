@@ -92,7 +92,7 @@ const VideoWithSubtitles = () => {
         const subsListForBackend = subs.length > 0 ? subs.map(sub => ({
             start: sub.start,
             end: sub.end,
-            text: sub.text.rus_Lath,
+            text: sub.text.rus_Latn,
             text_tat: sub.text.tat_Cyrl,
             language: sub.lang,
         })) : null;

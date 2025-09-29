@@ -74,7 +74,7 @@ const AudioPage = () => {
         const subsListForBackend = subs.length > 0 ? subs.map(sub => ({
             start: sub.start,
             end: sub.end,
-            text: sub.text.rus_Lath,
+            text: sub.text.rus_Latn,
             text_tat: sub.text.tat_Cyrl,
             language: sub.lang,
         })) : null;
@@ -107,7 +107,7 @@ const AudioPage = () => {
             console.log("Видео успешно обрезано:", response);
             console.log("Данные субтитров, полученные от бэкенда:", response.subtitles);
 
-            const formattedSubs = response.subtitlesList.map(sub => {
+            const formattedSubs = response.subtitles.map(sub => {
                 const textObject = {
                     "rus_Latn": sub.text,
                     "tat_Cyrl": sub.text_tat
@@ -125,7 +125,7 @@ const AudioPage = () => {
             console.log("Субтитры успешно созданы:", response);
 
         } catch (err) {
-            console.error("Ошибка при создании субтитров:", err);
+            console.error('Ошибка при создании субтитров:', JSON.stringify(err));
         }
     };
 
