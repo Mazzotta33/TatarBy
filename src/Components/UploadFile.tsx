@@ -37,7 +37,7 @@ const UploadFile = () => {
                 console.log("Video uploaded and URL stored:", videoUrl);
 
             } else if (e.target === fileInputRefAudio.current) {
-                res = await uploadAudio(file).unwrap();
+                res = await uploadVideo(file).unwrap();
                 const audioUrl = typeof res === "string" ? res : res.url;
                 localStorage.setItem("originalAudio", audioUrl);
                 localStorage.setItem("currentAudio", audioUrl);

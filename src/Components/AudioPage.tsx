@@ -1,13 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import {useMakeSubsMutation, useTranslateAudioMutation} from "../Redux/api/videoApi.ts";
+import {useTranslateAudioMutation} from "../Redux/api/videoApi.ts";
 import { useSelector } from "react-redux";
-
 import ru from '../translations/ru.json';
 import tat from '../translations/tat.json';
-import Dropdown from "./Dropdown.tsx";
 
 const translations = { ru, tat };
+import Dropdown from "./Dropdown.tsx";
 
 const subtitles = [];
 
@@ -37,7 +36,7 @@ const AudioPage = () => {
     const speakers = ["almaz", "alsu"];
     const [speaker, setSpeaker] = useState(speakers[0]);
 
-    const languages = ["Русский", "Татарский", "Английский"];
+    const languages = [ru.languages.russian, ru.languages.tatar, ru.languages.english];
     const [sourceLang, setSourceLang] = useState(languages[0]);
     const [targetLang, setTargetLang] = useState(languages[1]);
 
@@ -45,7 +44,14 @@ const AudioPage = () => {
     const [currentSub, setCurrentSub] = useState<null | { start: number; end: number; text: Record<string, string>; lang?: string }>(null);
 
     const currentLanguage = useSelector(state => state.language.current);
-    const t = (key) => translations[currentLanguage][key];
+    const t = (key) => {
+        const keys = key.split('.');
+        let result = translations[currentLanguage];
+        for (const k of keys) {
+            result = result?.[k];
+        }
+        return result;
+    };
     const translatedLanguages = [t('languages.russian'), t('languages.tatar'), t('languages.english')];
 
     const handleGoToExportPage = () => {
@@ -59,8 +65,8 @@ const AudioPage = () => {
     };
 
     const handleTranslateAudio = async () => {
-        const audioUrl = localStorage.getItem("originalAudio");
-        if (!audioUrl) {
+        const audio_url = localStorage.getItem("originalAudio");
+        if (!audio_url) {
             console.error("URL аудио не найден в localStorage.");
             return;
         }
@@ -83,7 +89,7 @@ const AudioPage = () => {
 
         try {
             const response = await translateAudio({
-                audioUrl: currentAudioUrl,
+                audio_url: currentAudioUrl,
                 params: {
                     audioVolume,
                     tatarAudioVolume: tatarianVolume,
@@ -91,19 +97,19 @@ const AudioPage = () => {
                     translateFrom: langLabelToCode(sourceLang),
                     translateTo: langLabelToCode(targetLang),
                 },
-                subtitlesList: subsListForBackend,
+                text: subsListForBackend,
             }).unwrap();
 
-            setCurrentAudioUrl(response.audioUrl);
-            localStorage.setItem("currentAudio", response.audioUrl);
+            setCurrentAudioUrl(response.filename);
+            localStorage.setItem("currentAudio", response.filename);
 
-            console.log("Видео успешно обрезано:", response.audioUrl);
+            console.log("Видео успешно обрезано:", response.filename);
             console.log("Видео успешно обрезано:", response);
-            console.log("Данные субтитров, полученные от бэкенда:", response.subtitlesList);
+            console.log("Данные субтитров, полученные от бэкенда:", response.subtitles);
 
             const formattedSubs = response.subtitlesList.map(sub => {
                 const textObject = {
-                    "rus_Lath": sub.text,
+                    "rus_Latn": sub.text,
                     "tat_Cyrl": sub.text_tat
                 };
 
@@ -125,7 +131,7 @@ const AudioPage = () => {
 
     const langLabelToCode = (label: string) => {
         if (!label) return "ru";
-        if (label.toLowerCase().startsWith("рус")) return "rus_Lath";
+        if (label.toLowerCase().startsWith("рус")) return "rus_Latn";
         if (label.toLowerCase().startsWith("тат")) return "tat_Cyrl";
         if (label.toLowerCase().startsWith("анг")) return "en";
         return "ru";

@@ -16,9 +16,9 @@ function Dropdown({label, options, value, onChange}: {
                         {value}
                     </Listbox.Button>
                     <Listbox.Options className="absolute mt-1 w-full rounded-md bg-white shadow-lg border border-green-400 z-10">
-                        {options.map((option) => (
+                        {options.map((option, index) => (
                             <Listbox.Option
-                                key={option}
+                                key={`${option}-${index}`}
                                 value={option}
                                 className={({ active, selected }) =>
                                     `cursor-pointer select-none p-2 ${active ? "bg-green-100 text-green-700" : selected ? "bg-green-50 text-green-600" : "text-gray-700"}`

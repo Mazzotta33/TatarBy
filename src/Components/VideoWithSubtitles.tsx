@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 
 import ru from '../translations/ru.json';
 import tat from '../translations/tat.json';
+import Dropdown from "./Dropdown.tsx";
 
 const translations = { ru, tat };
 
@@ -27,7 +28,7 @@ const VideoWithSubtitles = () => {
     const speakers = ["Алмаз", "Алсу"];
     const [speaker, setSpeaker] = useState(speakers[0]);
 
-    const languages = ["Русский", "Татарский", "Английский"];
+    const languages = [ru.languages.russian, ru.languages.tatar, ru.languages.english];
     const [sourceLang, setSourceLang] = useState(languages[0]);
     const [targetLang, setTargetLang] = useState(languages[1]);
 
@@ -35,7 +36,15 @@ const VideoWithSubtitles = () => {
     const [currentSub, setCurrentSub] = useState<null | { start: number; end: number; text: Record<string,string>; lang?: string }>(null);
 
     const currentLanguage = useSelector(state => state.language.current);
-    const t = (key) => translations[currentLanguage][key];
+    const t = (key) => {
+        const keys = key.split('.');
+        let result = translations[currentLanguage];
+        for (const k of keys) {
+            result = result?.[k];
+        }
+        return result;
+    };
+    const translatedLanguages = [t('languages.russian'), t('languages.tatar'), t('languages.english')];
 
 
     const handleGoToExportPage = () => {
@@ -93,15 +102,22 @@ const VideoWithSubtitles = () => {
         try {
             const response = await makeSubs({
                 video_url,
+                params: {
+                    audioVolume: 1,
+                    tatarAudioVolume: 1,
+                    speaker: "almaz",
+                    translateFrom: langLabelToCode(sourceLang),
+                    translateTo: langLabelToCode(targetLang),
+                },
                 text: subsListForBackend,
             }).unwrap();
 
             setCurrentVideoUrl(response.filename);
             localStorage.setItem("currentVideo", response.filename);
 
-            const formattedSubs = response.subtitlesList.map(sub => {
+            const formattedSubs = response.subtitles.map(sub => {
                 const textObject = {
-                    "rus_Lath": sub.text,
+                    "rus_Latn": sub.text,
                     "tat_Cyrl": sub.text_tat
                 };
 
@@ -123,7 +139,7 @@ const VideoWithSubtitles = () => {
 
     const langLabelToCode = (label: string) => {
         if (!label) return "ru";
-        if (label.toLowerCase().startsWith("рус")) return "rus_Lath";
+        if (label.toLowerCase().startsWith("рус")) return "rus_Latn";
         if (label.toLowerCase().startsWith("тат")) return "tat_Cyrl";
         if (label.toLowerCase().startsWith("анг")) return "en";
         return "ru";
@@ -257,6 +273,9 @@ const VideoWithSubtitles = () => {
                         <div className="text-red-600 mt-2">{t('subs_error')} {JSON.stringify(makeSubsError)}</div>}
 
                     <div className="border-t border-gray-200 my-2"/>
+
+                    <Dropdown label={t('from_language')} options={translatedLanguages} value={sourceLang} onChange={setSourceLang}/>
+                    <Dropdown label={t('to_language')} options={translatedLanguages} value={targetLang} onChange={setTargetLang}/>
                 </div>
             </div>
         </div>

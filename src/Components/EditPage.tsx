@@ -31,7 +31,7 @@ export default function EditPage() {
     const speakers = ["almaz", "alsu"];
     const [speaker, setSpeaker] = useState(speakers[0]);
 
-    const languages = [translations.ru.languages.russian, translations.ru.languages.tatar, translations.ru.languages.english];
+    const languages = [ru.languages.russian, ru.languages.tatar, ru.languages.english];
     const [sourceLang, setSourceLang] = useState(languages[0]);
     const [targetLang, setTargetLang] = useState(languages[1]);
 
@@ -39,7 +39,14 @@ export default function EditPage() {
     const [currentSub, setCurrentSub] = useState<null | { start: number; end: number; text: Record<string,string>; lang?: string }>(null);
 
     const currentLanguage = useSelector(state => state.language.current);
-    const t = (key) => translations[currentLanguage][key];
+    const t = (key) => {
+        const keys = key.split('.');
+        let result = translations[currentLanguage];
+        for (const k of keys) {
+            result = result?.[k];
+        }
+        return result;
+    };
 
     const translatedLanguages = [t('languages.russian'), t('languages.tatar'), t('languages.english')];
 
@@ -82,7 +89,7 @@ export default function EditPage() {
 
             const formattedSubs = response.subtitles.map(sub => {
                 const textObject = {
-                    "rus_Lath": sub.text,
+                    "rus_Latn": sub.text,
                     "tat_Cyrl": sub.text_tat
                 };
 
@@ -138,7 +145,7 @@ export default function EditPage() {
 
     const langLabelToCode = (label: string) => {
         if (!label) return "ru";
-        if (label.toLowerCase().startsWith("рус")) return "rus_Lath";
+        if (label.toLowerCase().startsWith("рус")) return "rus_Latn";
         if (label.toLowerCase().startsWith("тат")) return "tat_Cyrl";
         if (label.toLowerCase().startsWith("анг")) return "en";
         return "ru";
