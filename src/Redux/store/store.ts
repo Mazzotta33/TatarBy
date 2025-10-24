@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import {videoApi} from "../api/videoApi.ts";
 import languageSlice from "./languageSlice.ts";
+import {registerApi} from "../api/registerApi.ts";
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
@@ -8,6 +9,7 @@ export type AppDispatch = typeof store.dispatch;
 export const store = configureStore({
     reducer: {
         [videoApi.reducerPath]: videoApi.reducer,
+        [registerApi.reducerPath]: registerApi.reducer,
         language: languageSlice,
     },
     middleware: (getDefaultMiddleware) =>
