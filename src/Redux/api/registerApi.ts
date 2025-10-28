@@ -1,8 +1,9 @@
 import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
+import {baseQueryWithReauth} from "./baseQueryWithReauth.ts";
 
 export const registerApi = createApi({
     reducerPath: 'registerApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
+    baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         registerUser: builder.mutation<string, {username: string, password: string, email: string}>({
             query: ({ username, password, email }) => ({
@@ -11,16 +12,23 @@ export const registerApi = createApi({
                 body: { username, password, email },
             }),
         }),
-        loginUser: builder.mutation({
-            query: (body) => ({
+        loginUser: builder.mutation<
+            { access_token: string; refresh_token: string; token_type: string },
+            { email1: string; password: string }
+        >({
+            query: ({ email, password }) => ({
                 url: '/login',
                 method: 'POST',
-                body: body
-            })
-        })
+                body: {
+                    email,
+                    password,
+                },
+            }),
+        }),
     })
 })
 
 export const {
-    useRegisterUserMutation
+    useRegisterUserMutation,
+    useLoginUserMutation
 } = registerApi

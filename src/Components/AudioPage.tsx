@@ -143,7 +143,7 @@ const AudioPage = () => {
         <div className="min-h-screen flex flex-col items-center bg-gray-50 mt-5">
             <div className="w-full max-w-6xl px-6 py-4 flex justify-between items-center">
                 <button
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/upload")}
                     className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200"
                 >
                     <svg

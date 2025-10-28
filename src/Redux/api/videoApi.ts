@@ -1,4 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type {RootState} from "../store/store.ts";
+import {baseQueryWithReauth} from "./baseQueryWithReauth.ts";
 
 interface BackendSubtitle {
     start: number;
@@ -29,7 +31,7 @@ interface TranslateAudioResponse {
 
   export const videoApi = createApi({
     reducerPath: 'videoApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/' }),
+    baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
         uploadVideo: builder.mutation<string, File>({
             query: (file) => {
